@@ -9,8 +9,9 @@
   meta:
     action:
       disabled: false
+    disabled: false
 
-# 各種初期データを保存
+# zap連携で受け取った各種データを保存
 +store_value_14:
   action>: StoreValue
   display_name>: 変数に保存_zapから受け取ったId
@@ -49,7 +50,7 @@
 # 応募IDを本文から抽出
 +store_value_8:
   action>: StoreValue
-  display_name>: 変数に保存_エラー通知で使用
+  display_name>: 変数に保存_応募ID抽出
   key: OuboId
   value: "${mailBody.match(/応募ID[^\\d]*(\\d{3,})/)[1]}"
   setIfNotDefined: false
@@ -58,7 +59,7 @@
     action:
       disabled: false
 
-# SFクエリ用の初期化
+# Salesforce連携用初期化
 +store_value_9:
   action>: StoreValue
   display_name>: SFクエリ用の初期化
@@ -70,10 +71,10 @@
     action:
       disabled: false
 
-# 変数に保存
+# 変数に保存_adRecord初期化
 +store_value_10:
   action>: StoreValue
-  display_name>: 変数に保存
+  display_name>: 変数に保存_adRecord初期化
   key: adRecord
   value: "${parseInt(0)}"
   setIfNotDefined: false
@@ -82,10 +83,10 @@
     action:
       disabled: false
 
-# 変数に保存
+# 変数に保存_sfObj初期化
 +store_value_11:
   action>: StoreValue
-  display_name>: 変数に保存
+  display_name>: 変数に保存_sfObj初期化
   key: sfObj
   value: ''
   setIfNotDefined: false
@@ -98,7 +99,7 @@
 +try_1:
   try>:
     display_name>: エラー処理開始
-    errorObjectName: ''
+    errorObjectName: err
     private: false
   meta:
     action:
@@ -125,7 +126,7 @@
     # 変数に保存
     +store_value_1:
       action>: StoreValue
-      display_name>: 変数に保存
+      display_name>: 変数に保存_IDPW
       key: idpw
       value: "+run_script_1"
       setIfNotDefined: false
@@ -137,7 +138,7 @@
     # ログイン
     +open_browser_1:
       action>: OpenBrowser
-      display_name>: ログイン
+      display_name>: Bluecollarログイン
       url: https://bluecollar.jp/manage/login
       lang: ja-JP
       headless: true
@@ -148,10 +149,10 @@
         action:
           disabled: false
 
-    # 文字入力
+    # ID入力
     +type_text_1:
       action>: TypeText
-      display_name>: 文字入力
+      display_name>: ログインID入力
       browser: "+open_browser_1"
       selector: "#loginid"
       text: "${idpw.id}"
@@ -175,10 +176,10 @@
         action:
           disabled: false
 
-    # クリック
+    # ログインボタンクリック
     +click_1:
       action>: Click
-      display_name>: クリック
+      display_name>: ログイン実行
       browser: "+type_password_1"
       selector: "#login"
       confirm: true
@@ -195,30 +196,49 @@
       action>: GoTo
       display_name>: 応募一覧へ遷移
       browser: "+click_1"
-      url: https://bluecollar.jp/manage/secure/application/list?...
+      url: https://bluecollar.jp/manage/secure/application/list
       private: false
       meta:
         action:
           disabled: false
 
-    # 応募IDに一致する詳細画面へ遷移
+    # 応募IDの詳細ページへ直接遷移（置き換え推奨）
     +inject_script_2:
       action>: InjectScript
-      display_name>: 応募IDに一致する詳細画面へ遷移
+      display_name>: 応募IDの詳細ページへ遷移
       browser: "+go_to_1"
       code: |
-        (function() {
-          const id = "{{OuboId}}";
-          const rows = document.querySelectorAll("tbody tr");
-          for (let row of rows) {
-            const idCell = row.querySelectorAll("td")[2];
-            const editLink = row.querySelector("a.btn-inverse");
-            if (idCell && idCell.textContent.trim() === id && editLink) {
-              editLink.click();
-              return;
+        (() => {
+          try {
+            const ouboId = "${OuboId}";
+            const rows = document.querySelectorAll("tbody tr");
+
+            for (const row of rows) {
+              const cells = row.querySelectorAll("td");
+              if (cells.length < 3) continue;
+
+              const ouboIdCell = cells[2];
+              if (ouboIdCell && ouboIdCell.textContent.trim() === ouboId) {
+                // 応募IDと一致する行が見つかった
+
+                // 行内のリンク（idパラメータ付き）を探す
+                const link = row.querySelector(
+                  "a[href*='/manage/secure/application/update?id=']"
+                );
+                if (link && link.href) {
+                  window.location.href = link.href;
+                  return;
+                } else {
+                  throw new Error("応募IDの行にリンクが見つかりません");
+                }
+              }
             }
+
+            throw new Error("応募IDが見つかりませんでした: " + ouboId);
+          } catch (err) {
+            console.error("エラー:", err);
+            throw err;
           }
-          throw new Error("応募IDが見つかりません: " + id);
         })();
       returnValue: false
       private: false
@@ -226,58 +246,213 @@
         action:
           disabled: false
 
-    # メイン応募情報取得
-    +inject_script_1:
+    # 応募情報抽出（修正済み InjectScript）
+    +inject_get_entry_info:
       action>: InjectScript
-      display_name>: メイン応募情報取得
-      browser: "+open_browser_1"
+      display_name>: 応募情報取得
+      browser: "+go_to_1"
       code: |
-        function doPost(e) {
-          const props = PropertiesService.getScriptProperties();
-          const endpoint = props.getProperty("SF_ENDPOINT");
-          const relaySecret = props.getProperty("RELAY_SECRET");
+        (() => {
+          function getTextByLabel(label) {
+            const labelEls = Array.from(document.querySelectorAll(".row.mgt10"));
+            for (const el of labelEls) {
+              const labelTextEl = el.querySelector(".col-md-3");
+              const valueTextEl = el.querySelector(".col-md-9");
+              const labelText = labelTextEl ? labelTextEl.innerText.trim() : "";
+              const valueText = valueTextEl ? valueTextEl.innerText.trim() : "";
+              if (labelText === label) return valueText || "";
+            }
+            return "";
+          }
 
-          const payload = JSON.parse(e.postData.contents);
+          // 応募日＋時刻を取得する関数
+          function getFullAppliedDateTime() {
+            const el = document.querySelector(".media-heading .col-md-4");
+            if (!el) return "";
+            const match = el.innerText.match(
+              /応募日\s*(\d{4}\/\d{1,2}\/\d{1,2} \d{2}:\d{2}:\d{2})/
+            );
+            if (!match) return "";
+            const dt = match[1]; // e.g. "2025/10/22 14:09:52"
+            const [datePart, timePart] = dt.split(" ");
+            const [y, m, d] = datePart.split("/");
+            return (
+              y +
+              "-" +
+              ("0" + m).slice(-2) +
+              "-" +
+              ("0" + d).slice(-2) +
+              "T" +
+              timePart +
+              "+0900"
+            );
+          }
 
-          // 応募データ取得
-          const ouboId = payload.OuboId;
-          const name = payload.Name.trim();
-          const [sei, mei] = name.split(/\s+|　/); // 全角・半角空白で姓名分離
-          const age = parseInt(payload.Age.replace(/[^\d]/g, ""), 10); // 数字だけ抽出して数値化
+          const ouboId = "${OuboId}";
+          const nameRaw = document.querySelector(
+            ".media-body .row:nth-child(1) .col-md-8"
+          );
+          const name = nameRaw ? nameRaw.textContent.trim() : "";
+          const nameParts = name.split(/[\s　]+/);
+          const sei = nameParts[0] || "";
+          const mei = nameParts[1] || "";
+
+          const ageStr = getTextByLabel("年齢").replace(/[^\d]/g, "");
+          const age = parseInt(ageStr, 10);
 
           const field7 =
-            `年齢：${payload.Age}\n` +
-            `応募機器：${payload.Device}\n` +
-            `応募内容：${payload.Content}\n` +
-            `経験年数：${payload.Years}\n` +
-            `保有資格数：${payload.QualCount}\n` +
-            `保有資格について：${payload.Qualifications}\n` +
-            `希望連絡時間：${payload.ContactTime}\n` +
-            `自己PR：${payload.SelfPR}`;
+            "年齢：" +
+            getTextByLabel("年齢") +
+            "\n" +
+            "応募機器：" +
+            getTextByLabel("応募機器") +
+            "\n" +
+            "応募内容：" +
+            getTextByLabel("応募内容") +
+            "\n" +
+            "経験年数：" +
+            getTextByLabel("経験年数") +
+            "\n" +
+            "保有資格数：" +
+            getTextByLabel("保有資格数") +
+            "\n" +
+            "保有資格について：" +
+            getTextByLabel("保有資格について") +
+            "\n" +
+            "希望連絡時間：" +
+            getTextByLabel("希望連絡時間") +
+            "\n" +
+            "自己PR：" +
+            getTextByLabel("自己PR");
 
-          const sfBody = {
-            sei__c: sei || "",
-            mei__c: mei || "",
-            field20__c: isNaN(age) ? null : age,
-            field7__c: field7,
-            Entry__c: ouboId
-          };
-
-          const options = {
-            method: "POST",
-            contentType: "application/json",
-            headers: {
-              Authorization: `Bearer ${relaySecret}`
+          return {
+            sf: {
+              Field1__c: sei,
+              Field2__c: mei,
+              Field20__c: isNaN(age) ? null : age,
+              Field5__c: getTextByLabel("連絡のつく電話番号"),
+              Field6__c: getTextByLabel("メールアドレス"),
+              State__c: getTextByLabel("お住いの都道府県"),
+              City__c: getTextByLabel("お住いの市区町村"),
+              Field7__c: field7,
+              Field8__c: getFullAppliedDateTime(), // 日付＋時刻
+              Field19__c: "",
+              Field25__c: "BaseUpp",
+              Field45__c: "本社",
+              RecordTypeId: "0127F000000KJofQAG",
+              Field10__c: "0017F00002T9bnqQAB",
+              Field17__c: "ブルカラ",
+              Field9__c: "WEB",
+              SendEntryMail__c: true
             },
-            payload: JSON.stringify(sfBody),
-            muteHttpExceptions: true
+            nameHasNotBlank: !(sei && mei)
           };
+        })();
+      waitBefore: 2000
+      returnValue: true
+      private: false
+      meta:
+        action:
+          disabled: false
 
-          const res = UrlFetchApp.fetch(endpoint, options);
-          return ContentService.createTextOutput(res.getContentText()).setMimeType(
-            ContentService.MimeType.TEXT
-          );
-        }
+    # 応募情報を保存
+    +store_value_2:
+      action>: StoreValue
+      display_name>: 応募情報を保存
+      key: sfObj
+      value: "+inject_get_entry_info"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # テキストを取得
+    +get_text_1:
+      action>: GetText
+      display_name>: テキストを取得
+      browser: "+inject_script_2"
+      selector: p:nth-of-type(2) a
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存
+    +store_value_4:
+      action>: StoreValue
+      display_name>: 変数に保存
+      key: jobId
+      value: "+get_text_1"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # テキストを作成
+    +text_1:
+      action>: Text
+      display_name>: テキストを作成
+      text: https://bluecollar.jp/manage/preview/${jobId}
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存
+    +store_value_6:
+      action>: StoreValue
+      display_name>: 変数に保存
+      key: JobUrl
+      value: "+text_1"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 取得したURLに遷移
+    +go_to_job_preview:
+      action>: GoTo
+      display_name>: 応募求人のプレビューURLへ遷移
+      browser: "+go_to_1"
+      url: "${JobUrl}"
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # スクリーンショットを撮る
+    +take_screenshot_1:
+      action>: TakeScreenshot
+      display_name>: スクリーンショットを撮る
+      browser: "+go_to_1"
+      full_page: false
+      type: png
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # ページ内でJavaScriptを実行する
+    +inject_script_1:
+      action>: InjectScript
+      display_name>: ページ内でJavaScriptを実行する
+      browser: "+go_to_job_preview"
+      code: |
+        (() => {
+          const rows = document.querySelectorAll("tr");
+          for (const row of rows) {
+            const th = row.querySelector("th");
+            if (th && th.textContent.trim() === "求人No.") {
+              const td = row.querySelector("td");
+              return td ? td.textContent.trim() : null;
+            }
+          }
+          return null;
+        })();
       returnValue: true
       private: false
       meta:
@@ -285,10 +460,10 @@
           disabled: false
 
     # 変数に保存
-    +store_value_2:
+    +store_value_7:
       action>: StoreValue
       display_name>: 変数に保存
-      key: sfObj
+      key: JobNumber
       value: "+inject_script_1"
       setIfNotDefined: false
       private: false
@@ -310,21 +485,26 @@
     +salesforce_query_1:
       action>: SalesforceQuery
       display_name>: Salesforce求人クエリ
-      provider: sfdc_XXXXX
+      provider: sfdc_5d1544566cbf9f61b0d2
       query: |
         SELECT Id, job_number__c, Name, Field1743__c, ChargeOfBase__c
         FROM JobOffer__c
-        WHERE job_number__c = '${sfObj.kyujinNum}'
+        WHERE job_number__c = '${JobNumber}'
         LIMIT 1
       private: false
       meta:
+        display:
+          provider:
+            type: chip
+            label: Salesforce (y_itasaka@upthemark.com)
+            icon: salesforce
         action:
           disabled: false
 
-    # 変数に保存
+    # 求人情報を保存
     +store_value_3:
       action>: StoreValue
-      display_name>: 変数に保存
+      display_name>: 求人情報を保存
       key: kyujinRecord
       value: "+salesforce_query_1"
       setIfNotDefined: false
@@ -333,53 +513,47 @@
         action:
           disabled: false
 
-    # 求人情報があれば上書き
-    +if_1:
-      if>:
-        display_name>: 求人情報があれば上書き
-        condition: "${kyujinRecord.length}"
-        private: false
+    # 求人情報上書き
+    +run_script_2:
+      action>: RunScript
+      display_name>: Salesforce項目上書き
+      code: |
+        sfObj.sf.Field19__c = kyujinRecord[0].Id;
+        sfObj.sf.Field45__c = kyujinRecord[0].Field1743__c;
+        sfObj.sf.Field25__c = kyujinRecord[0].ChargeOfBase__c;
+        sfObj.sf.SendEntryMail__c = true;
+        return sfObj;
+      private: false
       meta:
         action:
           disabled: false
-      _do:
 
-        # スクリプトを実行
-        +run_script_2:
-          action>: RunScript
-          display_name>: スクリプトを実行
-          code: |
-            sfObj.sf.Field19__c = kyujinRecord[0].Id;
-            sfObj.sf.Field45__c = kyujinRecord[0].Field1743__c;
-            sfObj.sf.Field25__c = kyujinRecord[0].ChargeOfBase__c;
-            sfObj.sf.SendEntryMail__c = false;
-            return sfObj;
-          private: false
-          meta:
-            action:
-              disabled: false
+    # 上書き後sfObjを保存
+    +store_value_5:
+      action>: StoreValue
+      display_name>: 上書き後sfObjを保存
+      key: sfObj
+      value: "+run_script_2"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
 
-        # 変数に保存
-        +store_value_5:
-          action>: StoreValue
-          display_name>: 変数に保存
-          key: sfObj
-          value: "+run_script_2"
-          setIfNotDefined: false
-          private: false
-          meta:
-            action:
-              disabled: false
-
-    # レコード作成
+    # Salesforce登録
     +salesforce_create_record_1:
       action>: SalesforceCreateRecord
-      display_name>: レコード作成
-      provider: sfdc_XXXXX
+      display_name>: 応募レコード作成
+      provider: sfdc_5d1544566cbf9f61b0d2
       object: Entry__c
       data: "${sfObj.sf}"
       private: false
       meta:
+        display:
+          provider:
+            type: chip
+            label: Salesforce (y_itasaka@upthemark.com)
+            icon: salesforce
         action:
           disabled: false
 
@@ -389,138 +563,6 @@
       display_name>: LastId更新
       key: lastId_AIRWORK
       value: "${mailId}"
-      private: false
-      meta:
-        action:
-          disabled: false
-
-    # 姓名分離不可エラー通知（オプション）
-    +if_2:
-      if>:
-        display_name>: 姓名分離不可エラー通知（オプション）
-        condition: "${sfObj.nameHasNotBlank}"
-        private: false
-      meta:
-        action:
-          disabled: false
-      _do:
-
-        # オブジェクトのキーの値を取得
-        +get_value_with_key_1:
-          action>: GetValueWithKey
-          display_name>: オブジェクトのキーの値を取得
-          object: "+salesforce_create_record_1"
-          key: id
-          private: false
-          meta:
-            action:
-              disabled: false
-
-        # 変数に保存
-        +store_value_6:
-          action>: StoreValue
-          display_name>: 変数に保存
-          key: entryId
-          value: "+get_value_with_key_1"
-          setIfNotDefined: false
-          private: false
-          meta:
-            action:
-              disabled: false
-
-        # テキストを作成
-        +text_1:
-          action>: Text
-          display_name>: テキストを作成
-          text: |-
-            ※アスコム姓名分離※
-            https://.../Entry__c/${entryId}/view
-          private: false
-          meta:
-            action:
-              disabled: false
-
-        # Slackでメッセージを送信
-        +send_slack_message_1:
-          action>: SendSlackMessage
-          display_name>: Slackでメッセージを送信
-          provider: slack_XXXX
-          channel: "#システムerror通知"
-          text: "+text_1"
-          send_select: false
-          response_message: false
-          private: false
-          meta:
-            action:
-              disabled: false
-
-# エラー通知（汎用）
-+if_3:
-  if>:
-    display_name>: エラー通知（汎用）
-    condition: "${isErr}"
-    private: false
-  meta:
-    action:
-      disabled: false
-  _do:
-
-    # スクリプトを実行
-    +run_script_3:
-      action>: RunScript
-      display_name>: スクリプトを実行
-      code: |
-        const errorOutput = { 求人: "", 広告: "" };
-        if (!adRecord.length && kyujinRecord.length) {
-          errorOutput.広告 = `広告オブジェクトが見つかりません\n拠点=${kyujinRecord[0].Field1743__c}`;
-        } else if (!kyujinRecord.length && !!sfObj.sf) {
-          errorOutput.求人 = `求人No「${sfObj.sf.Field19__c}」が存在しません`;
-        } else if (!kyujinRecord.length) {
-          errorOutput.求人 = "求人Noが取得できませんでした";
-        }
-        return errorOutput;
-      private: false
-      meta:
-        action:
-          disabled: false
-
-    # 変数に保存
-    +store_value_12:
-      action>: StoreValue
-      display_name>: 変数に保存
-      key: er
-      value: "+run_script_3"
-      setIfNotDefined: false
-      private: false
-      meta:
-        action:
-          disabled: false
-
-    # テキストを作成
-    +text_2:
-      action>: Text
-      display_name>: テキストを作成
-      text: |
-        アスコム→SF転記エラー発生
-        メッセージ: ${isErr.message}
-        URL: ${url}
-        備考:
-        ${er.広告}
-        ${er.求人}
-      private: false
-      meta:
-        action:
-          disabled: false
-
-    # Slackでメッセージを送信
-    +send_slack_message_2:
-      action>: SendSlackMessage
-      display_name>: Slackでメッセージを送信
-      provider: slack_XXXX
-      channel: "#システムerror通知"
-      text: "+text_2"
-      send_select: false
-      response_message: false
       private: false
       meta:
         action:
