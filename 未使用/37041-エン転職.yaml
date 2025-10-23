@@ -1,0 +1,76 @@
+# ブラウザを開く
++open_browser_1:
+  action>: OpenBrowser
+  url: 'https://employment.en-japan.com/'
+  lang: 'ja-JP'
+  headless: true
+
+# 福井県クリック
++click_17bb9840b0c:
+  action>: Click
+  browser: +open_browser_1
+  selector: ':nth-child(3) > .subCategory > :nth-child(3)'
+  confirm: true
+  ignoreError: true
+
+# クリックUT
++click_17bb984873a:
+  action>: Click
+  browser: +open_browser_1
+  selector: ':nth-child(1) > .jobSearchListUnit > .unitBase > .jobNameArea > .job > .nameSet > .jobName > .jobNameText'
+  confirm: true
+  ignoreError: true
+
+# 開いているタブを表示
++show_tabs_1:
+  action>: ShowTabs
+  browser: +click_17bb984873a
+
+# タブを切り替える
++switch_tab_1:
+  action>: SwitchTab
+  browser: +click_17bb984873a
+  tab: 1
+
+# テキストを取得（社名）
++get_text_17bb984eeaa:
+  action>: GetText
+  browser: +open_browser_1
+  selector: '.text > .name'
+  ignoreError: true
+
+# 変数に保存
++store_value_1:
+  action>: StoreValue
+  key: c_name
+  value: +get_text_17bb984eeaa
+
+# テキストを取得（電話番号）
++get_text_17bb98562e8:
+  action>: GetText
+  browser: +open_browser_1
+  selector: ':nth-child(3) > .text'
+  ignoreError: true
+
+# 変数に保存
++store_value_2:
+  action>: StoreValue
+  key: c_phone
+  value: +get_text_17bb98562e8
+
+# レコードを作成する
++salesforce_create_record_1:
+  action>: SalesforceCreateRecord
+  provider: sfdc_5d1544566cbf9f61b0d2
+  object: Account
+  data: "{\n\"Name\":\"${c_name}\",\n\"Field5__c\":\"前\",\n\"Field6__c\":\"株式会社\",\n\"ChargeOfBase123__c\":\"FUKUI\",\n\"Field95__c\":\"本社\",\n\"Phone\":\"${c_phone}\"\n}\n"
+  meta:
+    display:
+      provider:
+        type: chip
+        label: 'Salesforce (y_itasaka@upthemark.com)'
+        icon: salesforce
+      object:
+        label: '1. 企業・個人'
+        icon: salesforce
+        type: chip

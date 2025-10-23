@@ -1,0 +1,27 @@
+# ファイルを取得
++get_file_1:
+  action>: GetFile
+  filename: 1xyn5HhPm4F122UoWgItDZWPYBXia6Py6
+  provider: gdrive_4bb1b2ec0bed48bc8c31
+  meta:
+    display:
+      provider:
+        type: chip
+        label: 'Google Drive (y_itasaka@upthemark.com)'
+        icon: googledrive
+      filename:
+        label: 'タイムシート.xlsx'
+        icon: text
+        type: chip
+
+# ワークシートを選択
++select_sheet_1:
+  action>: SelectSheet
+  filename: +get_file_1
+  sheetname: 1
+
+# セルの値を取得
++read_cell_1:
+  action>: ReadCell
+  worksheet: +select_sheet_1
+  celllabel: AI10

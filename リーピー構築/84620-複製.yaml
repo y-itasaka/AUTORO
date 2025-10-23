@@ -1,0 +1,602 @@
+# 日時を取得_開始時刻
++get_time_1:
+  action>: GetTime
+  format: YYYY-MM-DD HH:mm:ss.SSS
+  timezone: Asia/Tokyo
+  relativeTime: ''
+  private: false
+
+# 変数に保存_zapから受け取ったId
++store_value_14:
+  action>: StoreValue
+  key: mailId
+  value: "${mail_Id}"
+  setIfNotDefined: false
+  private: false
+
+# 変数に保存_zapから受け取った宛先（AirWorkのみ）
++store_value_15:
+  action>: StoreValue
+  key: mailTo
+  value: "${mailTo}"
+  setIfNotDefined: false
+  private: false
+
+# 変数に保存_zapから受け取った本文
++store_value_13:
+  action>: StoreValue
+  key: mailBody
+  value: "${mailBody}"
+  setIfNotDefined: false
+  private: false
+
+# 正規表現で検索
++match_text_1:
+  action>: MatchText
+  text: "${mailBody}"
+  regex: "(?<=https:\\/\\/ats\\.rct\\.airwork\\.net\\/sp\\/entries).*"
+  global: true
+  private: false
+
+# 変数に保存
++store_value_18:
+  action>: StoreValue
+  key: applicantID
+  value: "+match_text_1"
+  setIfNotDefined: false
+  private: false
+
+# 変数に保存_エラー通知で使用
++store_value_8:
+  action>: StoreValue
+  key: url
+  value: https://ats.rct.airwork.net/entries${applicantID[0]}edit
+  setIfNotDefined: false
+  private: false
+
+# 変数に保存_SFのクエリやエラー通知で使用
++store_value_9:
+  action>: StoreValue
+  key: kyujinRecord
+  value: "${parseInt(0)}"
+  setIfNotDefined: false
+  private: false
+
+# 変数に保存_SFのクエリやエラー通知で使用
++store_value_10:
+  action>: StoreValue
+  key: adRecord
+  value: "${parseInt(0)}"
+  setIfNotDefined: false
+  private: false
+
+# 変数に保存
++store_value_11:
+  action>: StoreValue
+  key: sfObj
+  value: ''
+  setIfNotDefined: false
+  private: false
+
+# エラーを捕捉する
++try_1:
+  try>: isErr
+  _do:
+
+    # スクリプトを実行_IDPWを設定
+    +run_script_1:
+      action>: RunScript
+      code: |
+        /***
+        追加時は以下形式でご入力ください。また、追加した行の直上行の右末尾　} 　の右にカンマを1つご入力ください
+        {id: "ログインID", pw: "パスワード", mail: "メールアドレス"},
+        ***/
+        const idpws = [
+          {
+            id: "upp@saitama123",
+            pw: "uppsaitama@123",
+            mail: "jobs@saitama.upthemark.com"
+          },
+          {
+            id: "upp@fukui_haken123",
+            pw: "uppfukui_haken@123",
+            mail: "jobs@fukui.upthemark.com"
+          },
+          {
+            id: "upp@osaka123",
+            pw: "upposaka@123",
+            mail: "jobs_osaka@upp.upthemark.com"
+          }
+        ];
+
+        const mailToList = [mailTo]; // 宛先メールアドレスのリスト化
+
+        const result = idpws.find(el => mailToList.some(mto => mto === el.mail)); // 指定されたメールアドレスと一致するIDとパスワードを検索
+
+        return result; // 検索結果を返す
+      private: false
+
+    # 変数に保存
+    +store_value_1:
+      action>: StoreValue
+      key: idpw
+      value: "+run_script_1"
+      setIfNotDefined: false
+      private: false
+
+    # ブラウザを開く
+    +open_browser_1:
+      action>: OpenBrowser
+      url: https://ats.rct.airwork.net/dashboards
+      lang: ja-JP
+      headless: true
+      confirm: true
+      windowSize: 1920 x 1080
+      useShadowDomSelector: false
+      private: false
+
+    # クリック（ログイン）
+    +click_2:
+      action>: Click
+      browser: "+open_browser_1"
+      selector: //a[text()="ログイン"]
+      confirm: true
+      waitAfter: 5000
+      ignoreError: true
+      timeout: 30000
+      private: false
+
+    # 文字入力（ID）
+    +type_text_1:
+      action>: TypeText
+      browser: "+open_browser_1"
+      selector: input[name="username"]
+      text: "${idpw.id}"
+      clearValue: false
+      ignoreError: false
+      private: false
+
+    # パスワード入力
+    +type_password_1:
+      action>: TypePassword
+      browser: "+type_text_1"
+      selector: input[name="password"]
+      password: "********"
+      ignoreError: false
+      private: false
+
+    # クリック（ログイン）
+    +click_1:
+      action>: Click
+      browser: "+type_password_1"
+      selector: input[value="ログイン"]
+      confirm: true
+      waitAfter: 1000
+      ignoreError: false
+      timeout: 10000
+      private: false
+
+    # URLへ遷移
+    +go_to_1:
+      action>: GoTo
+      browser: "+click_1"
+      url: https://ats.rct.airwork.net/entries${applicantID[0]}edit
+      private: false
+
+    # ページ内でJavaScriptを実行する_メイン情報取得
+    +inject_script_1:
+      action>: InjectScript
+      browser: "+open_browser_1"
+      code: |
+        // 名前とフリガナの取得
+        const name = document.querySelector('input[name="entry.entryName"]').value;
+        const kana = document.querySelector('input[name="entry.entryKana"]').value;
+
+        // 空白の有無による名前とフリガナの分割処理
+        const hasNotBlankN = !name.match(/\s/);
+        const hasNotBlankK = !kana.match(/\s/);
+        const lName = hasNotBlankN ? name : name.split(/\s/)[0];
+        const fName = hasNotBlankN ? name : name.split(/\s/)[1];
+        const kanaL = hasNotBlankK ? kana : kana.split(/\s/)[0];
+        const kanaF = hasNotBlankK ? kana : kana.split(/\s/)[1];
+
+        // 電話番号とメールアドレスの取得
+        const phone = document.querySelector('input[name="entry.entryPhone"]').value;
+        const email = document.querySelector('input[name="entry.entryEmail"]').value;
+
+        // 性別の取得と変換
+        const genderValue = document.querySelector('input[name="gender"]:checked')
+          .value;
+        const gender = genderValue === "01" ? "男性" : "女性";
+
+        // 応募日時の取得
+        const entryDateTimeText = document
+          .querySelector(".styles_content__TTlVn")
+          .textContent.trim();
+        const entryDateTime =
+          entryDateTimeText
+            .split("(")[0]
+            .trim()
+            .replace(/年|月/g, "-")
+            .replace(/日/g, "") +
+          "T" +
+          entryDateTimeText.split(" ")[1] +
+          ":00.000+0900";
+
+        // 応募先（勤務地）番号の正確な取得
+        const kyujinNum = document
+          .querySelectorAll(".styles_content__TTlVn")[1]
+          .textContent.trim();
+
+        // 生年月日の取得
+        const yearOfBirth = document.querySelector('select[name="yearOfBirth"]').value;
+        const monthOfBirth = document.querySelector('select[name="monthOfBirth"]')
+          .value;
+        const dateOfBirth = document.querySelector('select[name="dateOfBirth"]').value;
+        const birthday =
+          yearOfBirth +
+          "-" +
+          monthOfBirth.padStart(2, "0") +
+          "-" +
+          dateOfBirth.padStart(2, "0") +
+          "T00:00:00.000";
+
+        // 年齢の取得
+        const age = document.querySelector('input[name="entry.entryAge"]').value;
+
+        // 自由質問の内容取得
+        const freeQuestion = document.querySelector(
+          'textarea[name="entryScreeningQa.0.entryScreeningQaAnswer"]'
+        ).value;
+
+        // 出力データの準備
+        const output = {
+          nameHasNotBlank: hasNotBlankN,
+          kyujinNum: kyujinNum,
+          sf: {
+            Field8__c: entryDateTime, //応募日
+            Field9__c: "WEB", //応募区分。固定。
+            Field17__c: "ジョブオプLite", //応募媒体
+            Field18__c: "", //広告関連のフィールド、使用しない場合空
+            Field19__c: kyujinNum, //求人番号
+            Field10__c: "0017F00002T9bnqQAB", //固定のID、ダミーデータ
+            Field1__c: lName,
+            Field2__c: fName,
+            Field3__c: hiraToKana(kanaL),
+            Field4__c: hiraToKana(kanaF),
+            Field5__c: phone,
+            Field6__c: email,
+            Field54__c: gender,
+            birthday__c: birthday,
+            Field20__c: age, // 年齢
+            Field7__c: freeQuestion, // 自由質問の内容
+            Field25__c: "", // 所属
+            Field45__c: "" // 拠点
+          }
+        };
+        output;
+
+        function hiraToKana(str) {
+          return str.replace(/[\u3041-\u3096]/g, function(match) {
+            var chr = match.charCodeAt(0) + 0x60;
+            return String.fromCharCode(chr);
+          });
+        }
+      waitBefore: 2000
+      returnValue: true
+      private: false
+
+    # 変数に保存_メイン情報
+    +store_value_2:
+      action>: StoreValue
+      key: sfObj
+      value: "+inject_script_1"
+      setIfNotDefined: false
+      private: false
+
+    # テキストを作成
+    +text_6:
+      action>: Text
+      text: 応募者の求人IDを取得しに行く　↓
+      private: false
+
+    # 応募者一覧へ遷移
+    +go_to_2:
+      action>: GoTo
+      browser: "+go_to_1"
+      url: https://ats.rct.airwork.net/entries
+      waitAfter: 3000
+      private: false
+
+    # メール受信した候補者の名前を生成
+    +text_3:
+      action>: Text
+      text: "${sfObj.sf.Field1__c} ${sfObj.sf.Field2__c}"
+      private: false
+
+    # 生成した名前を入力
+    +type_text_2:
+      action>: TypeText
+      browser: "+go_to_2"
+      selector: ".styles_textBox__otPE_"
+      text: "+text_3"
+      clearValue: false
+      ignoreError: true
+      private: false
+
+    # 検索クリック
+    +click_3:
+      action>: Click
+      browser: "+type_text_2"
+      selector: ".styles_searchButton__aRKjk"
+      confirm: true
+      waitAfter: 3000
+      ignoreError: true
+      timeout: 30000
+      private: false
+
+    # 求人ID部分を取得
+    +get_text_1:
+      action>: GetText
+      browser: "+click_3"
+      selector: ".styles_jobTitle__huGET"
+      ignoreError: true
+      private: false
+
+    # 求人IDだけを取得
+    +match_text_2:
+      action>: MatchText
+      text: "+get_text_1"
+      regex: "(?<=^\\[)\\d+(?=\\])"
+      global: true
+      private: false
+
+    # 変数に保存
+    +store_value_7:
+      action>: StoreValue
+      key: identification_id
+      value: "+match_text_2"
+      setIfNotDefined: false
+      private: false
+
+    # 求人IDを組み合わせた識別SFのAirWORK_URLを生成
+    +text_5:
+      action>: Text
+      text: https://ats.rct.airwork.net/job_offers/overviews/${identification_id}/edit
+      private: false
+
+    # 変数に保存
+    +store_value_16:
+      action>: StoreValue
+      key: identification_id
+      value: "+text_5"
+      setIfNotDefined: false
+      private: false
+
+    # ブラウザを閉じる
+    +close_browser_1:
+      action>: CloseBrowser
+      browser: "+open_browser_1"
+      private: false
+
+    # クエリを実行する_求人オブジェクトから応募求人を取得する 1743=拠点, ChargeObBase=所属
+    +salesforce_query_1:
+      action>: SalesforceQuery
+      provider: sfdc_5d1544566cbf9f61b0d2
+      query: |-
+        SELECT Id, job_number__c, Name, Field1743__c, ChargeOfBase__c
+        FROM JobOffer__c
+        WHERE AirWORK_URL__c = '${identification_id}'
+        ORDER BY job_number__c ASC
+        LIMIT 1
+      private: false
+      meta:
+        display:
+          provider:
+            type: chip
+            label: Salesforce (y_itasaka@upthemark.com)
+            icon: salesforce
+
+    # 変数に保存
+    +store_value_3:
+      action>: StoreValue
+      key: kyujinRecord
+      value: "+salesforce_query_1"
+      setIfNotDefined: false
+      private: false
+
+    # 真のとき_求人OBJが存在
+    +if_1:
+      if>: "${kyujinRecord.length}"
+      _do:
+
+        # クエリを実行する_広告オブジェクトから条件を満たす広告を取得。※Airワーク表記はジョブオプLite（JOBUOPU）
+        +salesforce_query_2:
+          action>: SalesforceQuery
+          provider: sfdc_5d1544566cbf9f61b0d2
+          query: |-
+            SELECT Id, Name
+            FROM Advertisement__c
+            WHERE kyoten__c = '${kyujinRecord[0].Field1743__c}' AND Field4__c = 'ジョブオプLite'
+            ORDER BY CreatedDate DESC
+            LIMIT 1
+          private: false
+          meta:
+            display:
+              provider:
+                type: chip
+                label: Salesforce (y_itasaka@upthemark.com)
+                icon: salesforce
+
+        # 変数に保存
+        +store_value_4:
+          action>: StoreValue
+          key: adRecord
+          value: "+salesforce_query_2"
+          setIfNotDefined: false
+          private: false
+
+        # スクリプトを実行_求人OBJを整形
+        +run_script_2:
+          action>: RunScript
+          code: |
+            sfObj.sf.Field19__c = kyujinRecord[0].Id; //応募求人
+            sfObj.sf.Field45__c = kyujinRecord[0].Field1743__c; //拠点
+            sfObj.sf.Field25__c = kyujinRecord[0].ChargeOfBase__c; //所属
+            sfObj.sf.SendEntryMail__c = true; //板坂追加
+            if (adRecord.length) {
+              sfObj.sf.Field18__c = adRecord[0].Id;
+            } else {
+              delete sfObj.sf.Field18__c;
+            }
+            return sfObj;
+          private: false
+
+        # 変数に保存
+        +store_value_5:
+          action>: StoreValue
+          key: sfObj
+          value: "+run_script_2"
+          setIfNotDefined: false
+          private: false
+
+    # レコードを作成する_応募に新レコードを作成
+    +salesforce_create_record_1:
+      action>: SalesforceCreateRecord
+      provider: sfdc_5d1544566cbf9f61b0d2
+      object: Entry__c
+      data: "${sfObj.sf}"
+      private: false
+      meta:
+        display:
+          provider:
+            type: chip
+            label: Salesforce (y_itasaka@upthemark.com)
+            icon: salesforce
+
+    # データを保存する_LastIDを更新
+    +data_store_save_1:
+      action>: DataStoreSave
+      key: lastId_AIRWORK
+      value: "${mailId}"
+      private: false
+
+    # 真のとき_Airワーク_姓名分離不可
+    +if_2:
+      if>: "${sfObj.nameHasNotBlank}"
+      _do:
+
+        # オブジェクトのキーの値を取得
+        +get_value_with_key_1:
+          action>: GetValueWithKey
+          object: "+salesforce_create_record_1"
+          key: id
+          private: false
+
+        # 変数に保存
+        +store_value_6:
+          action>: StoreValue
+          key: entryId
+          value: "+get_value_with_key_1"
+          setIfNotDefined: false
+          private: false
+
+        # テキストを作成
+        +text_1:
+          action>: Text
+          text: |-
+            ※Airワーク姓名分離※
+            以下のレコードで、姓と名が分離できませんでした。ご確認をお願い致します。
+            https://upthemark.lightning.force.com/lightning/r/Entry__c/${entryId}/view
+          private: false
+
+        # Slackでメッセージを送信
+        +send_slack_message_1:
+          action>: SendSlackMessage
+          provider: slack_1d02f58ac5dff80799f9
+          channel: "#システムerror通知"
+          text: "+text_1"
+          send_select: false
+          response_message: false
+          private: false
+          meta:
+            display:
+              provider:
+                type: chip
+                label: Slack (Up the Mark Group)
+                icon: slack
+
+# エラーのとき
++if_3:
+  if>: "${isErr}"
+  _do:
+
+    # スクリプトを実行_エラー内容を生成
+    +run_script_3:
+      action>: RunScript
+      code: |
+        const errorOutput = {
+          求人: "",
+          広告: ""
+        };
+        if (!adRecord.length && kyujinRecord.length) {
+          errorOutput.広告 =
+            "広告オブジェクトに以下条件を満たすレコードが存在しませんでした。\n拠点 = " +
+            kyujinRecord[0].Field1743__c +
+            "\n広告媒体 = 「ジョブオプLite」（Airワーク）";
+        } else if (!kyujinRecord.length && !!sfObj.sf) {
+          errorOutput.求人 =
+            "求人オブジェクトに求人No「" +
+            sfObj.sf.Field19__c +
+            "」が存在しませんでした。";
+        } else if (!kyujinRecord.length) {
+          errorOutput.求人 = "求人Noが取得できませんでした";
+        }
+        return errorOutput;
+      private: false
+
+    # 変数に保存
+    +store_value_12:
+      action>: StoreValue
+      key: er
+      value: "+run_script_3"
+      setIfNotDefined: false
+      private: false
+
+    # エラーテキストを作成
+    +text_2:
+      action>: Text
+      text: |-
+        AirWork→SFへの転記でエラーが発生しました。
+        エラーメッセージ：${isErr.message}
+        該当応募者URL
+        ${url}
+
+        備考（あれば↓に文字が入ります）
+        ${er.広告}
+        ${er.求人}
+      private: false
+
+    # Slackでメッセージを送信
+    +send_slack_message_2:
+      action>: SendSlackMessage
+      provider: slack_1d02f58ac5dff80799f9
+      channel: "#システムerror通知"
+      text: "+text_2"
+      send_select: false
+      response_message: false
+      private: false
+      meta:
+        display:
+          provider:
+            type: chip
+            label: Slack (Up the Mark Group)
+            icon: slack
+
+# 日時を取得_終了時刻
++get_time_2:
+  action>: GetTime
+  format: YYYY-MM-DD HH:mm:ss.SSS
+  timezone: Asia/Tokyo
+  relativeTime: ''
+  private: false

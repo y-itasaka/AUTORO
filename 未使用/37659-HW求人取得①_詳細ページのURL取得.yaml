@@ -1,0 +1,78 @@
+# ブラウザを開く
++open_browser_1:
+  action>: OpenBrowser
+  url: 'https://www.hellowork.mhlw.go.jp/member/mem_top.html'
+  lang: 'ja-JP'
+  headless: true
+
+# クリック（求人検索へ）
++click_1:
+  action>: Click
+  browser: +open_browser_1
+  selector: ':nth-child(6) > .align_self > .button'
+  confirm: true
+  ignoreError: true
+
+# 選択肢を選ぶ
++select_option_1:
+  action>: SelectOption
+  browser: +click_1
+  selector: '#ID_tDFK1CmbBox'
+  value: ''
+  text: '福井県'
+  confirm: true
+  ignoreError: true
+
+# クリック（検索）
++click_3:
+  action>: Click
+  browser: +select_option_1
+  selector: '#ID_searchBtn'
+  confirm: true
+  waitAfter: 5000
+  ignoreError: true
+
+# テキストを取得_ヒット件数
++get_text_1:
+  action>: GetText
+  browser: +click_3
+  selector: ':nth-child(12) > :nth-child(1) > .m05 > .fb'
+  ignoreError: true
+
+# 変数に保存_ヒット件数
++store_value_1:
+  action>: StoreValue
+  key: hitcount
+  value: +get_text_1
+
+# 既存のスプレッドシートを取得
++get_spreadsheet_1:
+  action>: GetSpreadsheet
+  provider: ''
+  spreadsheet_id: ''
+
+# 繰り返し_（ヒット件数 ÷ 表示件数）の切り上げ
++loop_1:
+  loop>: ${Math.ceil( parseInt( hitcount ) / 30 )}
+  _do:
+
+    # スクレイピング
+    +scrape_page_1:
+      action>: ScrapePage
+      browser: +click_3
+      selector: '#ID_dispDetailBtn'
+      text_only: false
+      ignoreError: true
+
+    # 各要素について繰り返す_各求人の詳細ページリンク
+    +for_each_1:
+      for_each>:
+        button: +scrape_page_1
+      _do:
+
+        # 末尾に値を追加
+        +append_values_1:
+          action>: AppendValues
+          spreadsheet: +get_spreadsheet_1
+          range: A1
+          values: ${button.href}

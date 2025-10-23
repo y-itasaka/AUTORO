@@ -1,0 +1,37 @@
+# ファイルを取得（タイムシート）
++get_file_1:
+  action>: GetFile
+  filename: 1xyn5HhPm4F122UoWgItDZWPYBXia6Py6
+  provider: gdrive_8b485bcece275ef1bc60
+  meta:
+    display:
+      provider:
+        type: chip
+        label: 'Google Drive (ryo.nakajima@tutorial.co.jp)'
+        icon: googledrive
+
+# 繰り返し
++loop_1:
+  loop>: 21
+  _do:
+
+    # ワークシートを選択
+    +select_sheet_1:
+      action>: SelectSheet
+      filename: +get_file_1
+      sheetname: ${i + 1}
+      middleware: xlsx
+
+    # セルの値を取得（氏名）
+    +read_cell_1:
+      action>: ReadCell
+      worksheet: +select_sheet_1
+      celllabel: D7
+      middleware: xlsx
+
+    # 範囲を読み込む（基本時間、残業時間、深夜時間、休日時間）
+    +read_range_1:
+      action>: ReadRange
+      worksheet: +select_sheet_1
+      range: 'T10:AE11'
+      middleware: xlsx

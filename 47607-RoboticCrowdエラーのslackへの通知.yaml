@@ -1,0 +1,19 @@
+# テキストを作成
++text_1:
+  action>: Text
+  text: "以下のワークフローでエラーが発生しました。\n\nワークフロー名：${error.workflow.name}\nワークフローID：${error.workflow.id}\nエラーメッセージ：${error.message}\nエラー発生時刻：${error.session_time}\nセッションログURL：${error.session_url}"
+
+# Slackでメッセージを送信
++send_slack_message_1:
+  action>: SendSlackMessage
+  provider: slack_1d02f58ac5dff80799f9
+  channel: '#システムerror通知'
+  text: +text_1
+  send_select: false
+  response_message: false
+  meta:
+    display:
+      provider:
+        type: chip
+        label: 'Slack (Up the Mark Group)'
+        icon: slack

@@ -1,0 +1,536 @@
+# 日時を取得_開始時刻
++get_time_1:
+  action>: GetTime
+  display_name>: 日時を取得_開始時刻
+  format: YYYY-MM-DD HH:mm:ss.SSS
+  timezone: Asia/Tokyo
+  relativeTime: ''
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存_zapから受け取ったId
++store_value_14:
+  action>: StoreValue
+  display_name>: 変数に保存_zapから受け取ったId
+  key: mailId
+  value: "${mail_Id}"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存_zapから受け取った宛先（AirWorkのみ）
++store_value_15:
+  action>: StoreValue
+  display_name>: 変数に保存_zapから受け取った宛先（AirWorkのみ）
+  key: mailTo
+  value: "${mailTo}"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存_zapから受け取った本文
++store_value_13:
+  action>: StoreValue
+  display_name>: 変数に保存_zapから受け取った本文
+  key: mailBody
+  value: "${mailBody}"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存_エラー通知で使用
++store_value_8:
+  action>: StoreValue
+  display_name>: 変数に保存_エラー通知で使用
+  key: url
+  value: "${mailBody.match(/https.*/g)[1]}"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存_SFのクエリやエラー通知で使用
++store_value_9:
+  action>: StoreValue
+  display_name>: 変数に保存_SFのクエリやエラー通知で使用
+  key: kyujinRecord
+  value: "${parseInt(0)}"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存_SFのクエリやエラー通知で使用
++store_value_10:
+  action>: StoreValue
+  display_name>: 変数に保存_SFのクエリやエラー通知で使用
+  key: adRecord
+  value: "${parseInt(0)}"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存
++store_value_11:
+  action>: StoreValue
+  display_name>: 変数に保存
+  key: sfObj
+  value: ''
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# ブラウザを開く
++open_browser_1:
+  action>: OpenBrowser
+  display_name>: ブラウザを開く
+  url: https://admin.job-ole.com/company/login
+  lang: ja-JP
+  timeZone: Asia/Tokyo
+  headless: true
+  confirm: true
+  windowSize: 1280 x 720
+  useShadowDomSelector: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 文字入力_ログインID
++type_text_1:
+  action>: TypeText
+  display_name>: 文字入力_ログインID
+  browser: "+open_browser_1"
+  selector: form#loginform input#email
+  text: s_itakura@upthemark.com
+  clearValue: false
+  ignoreError: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# パスワード入力
++type_password_1:
+  action>: TypePassword
+  display_name>: パスワード入力
+  browser: "+type_text_1"
+  selector: input#password
+  password: "********"
+  ignoreError: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# クリック_ログイン
++click_1:
+  action>: Click
+  display_name>: クリック_ログイン
+  browser: "+type_password_1"
+  selector: form#loginform button[type="button"]
+  confirm: true
+  ignoreError: false
+  timeout: 5000
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# スクリーンショットを撮る
++take_screenshot_1:
+  action>: TakeScreenshot
+  display_name>: スクリーンショットを撮る
+  browser: "+click_1"
+  full_page: false
+  type: png
+  waitBefore: 5000
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# エラーを捕捉する
++try_1:
+  try>:
+    display_name>: エラーを捕捉する
+    errorObjectName: isErr
+    private: false
+  meta:
+    action:
+      disabled: false
+  _do:
+
+    # URLへ遷移
+    +go_to_1:
+      action>: GoTo
+      display_name>: URLへ遷移
+      browser: "+open_browser_1"
+      url: "${url}"
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # ページ内でJavaScriptを実行する
+    +inject_script_1:
+      action>: InjectScript
+      display_name>: ページ内でJavaScriptを実行する
+      browser: "+open_browser_1"
+      code: |2
+
+
+        // 名前の取得（nullチェック付き）
+        const nameElement = document.querySelector("div.name");
+        const name = nameElement ? nameElement.innerText.trim() : "　";
+
+        // 応募データの取得
+        const sfData = [
+          ...document.querySelectorAll(
+            "div.panel-common-body > div:nth-child(1) > div.row.form-group.form-block"
+          )
+        ].reduce((obj, currentDiv) => {
+          const labelEl = currentDiv.querySelector("label");
+          const valueEl = currentDiv.querySelector("div");
+
+          if (labelEl && valueEl) {
+            const label = labelEl.innerText.replace(/\s/g, "");
+            const value = valueEl.innerText.trim();
+            obj[label] = value;
+          }
+
+          return obj;
+        }, {});
+
+        // 分割済みの名前（空白がなければ両方 undefined になるのを防ぐ）
+        const [Field1__c = "", Field2__c = ""] = name.split(/\s/);
+
+        // 出力オブジェクトの生成（null対策付き）
+        const output = {
+          Field8__c: sfData.応募日時 || "", // 応募日
+          Field9__c: "WEB", // 応募区分。固定
+          Field17__c: "ジョブオレ", // 応募媒体
+
+          Field19__c: (sfData.求人名 || "").replace(/.*#/g, "").replace(/\D/g, ""), // 応募求人番号
+          Field10__c: "0017F00002T9bnqQAB", // 固定
+          Field1__c,
+          Field2__c,
+          // Field3__c: kanaL,
+          // Field4__c: kanaF,
+          Field5__c: (sfData.電話 || "").replace(/\s/g, "-"),
+          Field6__c: sfData.メールアドレス || "",
+          City__c: sfData.お住まいの地域 || "", // AirWorkでは不使用
+          Field54__c: sfData.性別 || "",
+          birthday__c: sfData.生年月日 || "",
+          SendEntryMail__c: true,
+          Field20__c: parseInt(sfData.年齢 || "0"),
+          Field7__c: sfData["採用担当者へのメッセージ"] || ""
+          // "Field25__c": sfData.任意項目,
+          // "Field45__c": sfData.任意項目
+        };
+
+        output;
+      waitBefore: 3000
+      returnValue: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存
+    +store_value_1:
+      action>: StoreValue
+      display_name>: 変数に保存
+      key: sfObj
+      value: "+inject_script_1"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # スクリプトを実行_日付を所定の型式に加工
+    +run_script_1:
+      action>: RunScript
+      display_name>: スクリプトを実行_日付を所定の型式に加工
+      code: |
+        sfObj.Field8__c = moment(sfObj.Field8__c).format(
+          "YYYY-MM-DDTHH:mm:ss.SSS+0900"
+        );
+
+        // 生年月日は "日付のみ" 正確に保つため、+0900 を指定（JST 00:00）
+        sfObj.birthday__c = moment(sfObj.birthday__c).format("YYYY-MM-DD");
+
+        return sfObj;
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存
+    +store_value_2:
+      action>: StoreValue
+      display_name>: 変数に保存
+      key: sfObj
+      value: "+run_script_1"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クエリを実行する_求人オブジェクトから応募求人を取得する 1743=拠点, ChargeObBase=所属
+    +salesforce_query_1:
+      action>: SalesforceQuery
+      display_name>: クエリを実行する_求人オブジェクトから応募求人を取得する 1743=拠点, ChargeObBase=所属
+      provider: sfdc_5d1544566cbf9f61b0d2
+      query: |-
+        SELECT Id, job_number__c, Name, Field1743__c, ChargeOfBase__c
+        FROM JobOffer__c
+        WHERE job_number__c = '${String(sfObj.Field19__c)}'
+        ORDER BY job_number__c ASC
+        LIMIT 1
+      private: false
+      meta:
+        display:
+          provider:
+            type: chip
+            label: Salesforce (y_itasaka@upthemark.com)
+            icon: salesforce
+        action:
+          disabled: false
+
+    # 変数に保存
+    +store_value_3:
+      action>: StoreValue
+      display_name>: 変数に保存
+      key: kyujinRecord
+      value: "+salesforce_query_1"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 真のとき_求人OBJが存在
+    +if_1:
+      if>:
+        display_name>: 真のとき_求人OBJが存在
+        condition: "${kyujinRecord.length}"
+        private: false
+      meta:
+        action:
+          disabled: false
+      _do:
+
+        # クエリを実行する_広告オブジェクトから条件を満たす広告を取得。※Airワーク表記はジョブオブLite
+        +salesforce_query_2:
+          action>: SalesforceQuery
+          display_name>: クエリを実行する_広告オブジェクトから条件を満たす広告を取得。※Airワーク表記はジョブオブLite
+          provider: sfdc_5d1544566cbf9f61b0d2
+          query: |-
+            SELECT Id, Name
+            FROM Advertisement__c
+            WHERE kyoten__c = '${kyujinRecord[0].Field1743__c}' AND Field4__c = 'ジョブオレ'
+            ORDER BY CreatedDate DESC
+            LIMIT 1
+          private: false
+          meta:
+            display:
+              provider:
+                type: chip
+                label: Salesforce (y_itasaka@upthemark.com)
+                icon: salesforce
+            action:
+              disabled: false
+
+        # 変数に保存
+        +store_value_4:
+          action>: StoreValue
+          display_name>: 変数に保存
+          key: adRecord
+          value: "+salesforce_query_2"
+          setIfNotDefined: false
+          private: false
+          meta:
+            action:
+              disabled: false
+
+        # スクリプトを実行_求人OBJを整形
+        +run_script_2:
+          action>: RunScript
+          display_name>: スクリプトを実行_求人OBJを整形
+          code: |
+            sfObj.Field19__c = kyujinRecord[0].Id; //応募求人
+            sfObj.Field45__c = kyujinRecord[0].Field1743__c; //拠点
+            sfObj.Field25__c = kyujinRecord[0].ChargeOfBase__c; //所属
+
+            return sfObj;
+          private: false
+          meta:
+            action:
+              disabled: false
+
+        # 変数に保存
+        +store_value_5:
+          action>: StoreValue
+          display_name>: 変数に保存
+          key: sfObj
+          value: "+run_script_2"
+          setIfNotDefined: false
+          private: false
+          meta:
+            action:
+              disabled: false
+
+    # レコードを作成する_応募に新レコードを作成
+    +salesforce_create_record_1:
+      action>: SalesforceCreateRecord
+      display_name>: レコードを作成する_応募に新レコードを作成
+      provider: sfdc_5d1544566cbf9f61b0d2
+      object: Entry__c
+      data: "${sfObj}"
+      private: false
+      meta:
+        display:
+          provider:
+            type: chip
+            label: Salesforce (y_itasaka@upthemark.com)
+            icon: salesforce
+        action:
+          disabled: false
+
+    # データを保存する_LastIDを更新
+    +data_store_save_1:
+      action>: DataStoreSave
+      display_name>: データを保存する_LastIDを更新
+      key: lastId_JOBOLE
+      value: "${mailId}"
+      private: false
+      meta:
+        action:
+          disabled: false
+
+# エラーのとき
++if_3:
+  if>:
+    display_name>: エラーのとき
+    condition: "${isErr}"
+    private: false
+  meta:
+    action:
+      disabled: false
+  _do:
+
+    # スクリプトを実行_エラー内容を生成
+    +run_script_3:
+      action>: RunScript
+      display_name>: スクリプトを実行_エラー内容を生成
+      code: |
+        const errorOutput = {
+          求人: "",
+          広告: ""
+        };
+        if (!adRecord.length && kyujinRecord.length) {
+          errorOutput.広告 =
+            "広告オブジェクトに以下条件を満たすレコードが存在しませんでした。\n拠点 = " +
+            kyujinRecord[0].Field1743__c +
+            "\n広告媒体 = 「ジョブオプLite」（Airワーク）";
+        } else if (!kyujinRecord.length && !!sfObj.sf) {
+          errorOutput.求人 =
+            "求人オブジェクトに求人No「" +
+            sfObj.sf.Field19__c +
+            "」が存在しませんでした。";
+        } else if (!kyujinRecord.length) {
+          errorOutput.求人 = "求人Noが取得できませんでした";
+        }
+        return errorOutput;
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存
+    +store_value_12:
+      action>: StoreValue
+      display_name>: 変数に保存
+      key: er
+      value: "+run_script_3"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # エラーテキストを作成
+    +text_2:
+      action>: Text
+      display_name>: エラーテキストを作成
+      text: |-
+        ジョブオレ→SFへの転記でエラーが発生しました。
+        エラーメッセージ：${isErr.message}
+        該当応募者URL
+        ${url}
+
+        備考（あれば↓に文字が入ります）
+        ${er.広告}
+        ${er.求人}
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # Slackでメッセージを送信
+    +send_slack_message_2:
+      action>: SendSlackMessage
+      display_name>: Slackでメッセージを送信
+      provider: slack_1d02f58ac5dff80799f9
+      channel: "#システムerror通知"
+      text: "+text_2"
+      send_select: false
+      response_message: false
+      private: false
+      meta:
+        display:
+          provider:
+            type: chip
+            label: Slack (Up the Mark Group)
+            icon: slack
+        action:
+          disabled: false
+
+# ブラウザを閉じる
++close_browser_1:
+  action>: CloseBrowser
+  display_name>: ブラウザを閉じる
+  browser: "+open_browser_1"
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 日時を取得_終了時刻
++get_time_2:
+  action>: GetTime
+  display_name>: 日時を取得_終了時刻
+  format: YYYY-MM-DD HH:mm:ss.SSS
+  timezone: Asia/Tokyo
+  relativeTime: ''
+  private: false
+  meta:
+    action:
+      disabled: false

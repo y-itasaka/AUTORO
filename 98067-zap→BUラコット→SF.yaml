@@ -1,0 +1,613 @@
+# ブラウザを開く
++open_browser_3:
+  action>: OpenBrowser
+  display_name>: ブラウザを開く
+  url: https://adopt.jp/admin/users/sign_in
+  lang: ja-JP
+  headless: true
+  confirm: true
+  useShadowDomSelector: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 文字入力
++type_text_1:
+  action>: TypeText
+  display_name>: 文字入力
+  browser: "+open_browser_3"
+  selector: "#user_email"
+  text: entry@baseupp.com
+  clearValue: false
+  ignoreError: true
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# パスワード入力
++type_password_1:
+  action>: TypePassword
+  display_name>: パスワード入力
+  browser: "+type_text_1"
+  selector: "#user_password"
+  password: "********"
+  ignoreError: true
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# クリック
++click_1:
+  action>: Click
+  display_name>: クリック
+  browser: "+type_password_1"
+  selector: "#btn_login"
+  confirm: true
+  ignoreError: true
+  timeout: 30000
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# ===== 開始時刻 =====
++get_time_1:
+  action>: GetTime
+  display_name>: 日時を取得_開始時刻
+  format: YYYY-MM-DD HH:mm:ss.SSS
+  timezone: Asia/Tokyo
+  relativeTime: ''
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# ===== Zap からの受領値 =====
++store_value_14:
+  action>: StoreValue
+  display_name>: 変数に保存_zapから受け取ったId
+  key: mailId
+  value: "${mail_Id}"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存_宛先（AirWorkのみ）
++store_value_15:
+  action>: StoreValue
+  display_name>: 変数に保存_宛先（AirWorkのみ）
+  key: mailTo
+  value: "${mailTo}"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存_メール本文
++store_value_13:
+  action>: StoreValue
+  display_name>: 変数に保存_メール本文
+  key: mailBody
+  value: "${mailBody}"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# ===== 本文から抽出 =====
++store_value_8:
+  action>: StoreValue
+  display_name>: 抽出_求人タイトル
+  key: OuboId
+  value: "${mailBody.match(/\\[ 求人タイトル \\]\\s*([\\s\\S]+?)\\r?\\n/)[1].trim()}"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 抽出_応募一覧URL
++store_value_9:
+  action>: StoreValue
+  display_name>: 抽出_応募一覧URL
+  key: OuboListURL
+  value: ${(mailBody.match(/https?:\/\/[\w/:%#\$&\?\(\)~\.=\+\-]+/g) || [])[0] ||
+    ""}
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 抽出_案件No
++store_value_10:
+  action>: StoreValue
+  display_name>: 抽出_案件No
+  key: kyujinNo
+  value: "${mailBody.match(/\\[ 案件No \\s*\\] \\s*(\\d+)/)[1]}"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 整形_応募日時
++store_value_4:
+  action>: StoreValue
+  display_name>: 整形_応募日時
+  key: OuboDateTime
+  value: ${((mailBody.match(/\[ 応募日時 \s*\]\s*([\d０-９年月日:： ]+)\r?\n?/) || [])[1] ||
+    "")   .replace("年", "/")   .replace("月", "/")   .replace("日", "")   .replace(/：/,
+    ":")   .trim()}
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# ===== 作業用オブジェクト初期化 =====
++store_value_11:
+  action>: StoreValue
+  display_name>: sfObj初期化
+  key: sfObj
+  value: ''
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# ===== 例外捕捉 =====
++try_1:
+  try>:
+    display_name>: エラーを捕捉する
+    errorObjectName: isErr
+    private: false
+  meta:
+    action:
+      disabled: false
+  _do:
+
+    # --- ログイン資格の決定（※ pw は実値に変更）---
+    +run_script_1:
+      action>: RunScript
+      display_name>: スクリプト_IDPWを決定
+      code: |
+        /** 追加時は {id:'', pw:'', mail:''} を増やす */
+        const accounts = [
+          { id: "entry@baseupp.com", pw: "BaseUpp123", mail: "entry@baseupp.com" },
+          { id: "entry@baseupp.com", pw: "BaseUpp123", mail: "entry@baseupp.com" },
+          { id: "entry@baseupp.com", pw: "BaseUpp123", mail: "entry@baseupp.com" }
+        ];
+        const target = accounts.find(a => a.mail === mailTo) || accounts[0];
+        if (!target) throw new Error("ログイン資格が見つかりません");
+        return target;
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 保存_IDPW
+    +store_value_1:
+      action>: StoreValue
+      display_name>: 保存_IDPW
+      key: idpw
+      value: "+run_script_1"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # --- 応募一覧へ遷移 ---
+    +go_to_1:
+      action>: GoTo
+      display_name>: 遷移_応募一覧
+      browser: "+click_1"
+      url: "${OuboListURL}"
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # --- 一覧から対象詳細へ（JSで遷移）---
+    +inject_script_2:
+      action>: InjectScript
+      display_name>: JS_一覧→詳細遷移
+      browser: "+go_to_1"
+      code: |
+        (function() {
+          const targetTitle = "${OuboId}";
+          const targetDateTime = "${OuboDateTime}";
+          if (!targetTitle || !targetDateTime) {
+            throw new Error("求人タイトルまたは応募日時が未設定です");
+          }
+          const rows = Array.from(document.querySelectorAll("tbody tr"));
+          for (const row of rows) {
+            const cells = row.querySelectorAll("td");
+            const appliedDateCell = cells[4];
+            const titleCell = cells[6];
+            if (!appliedDateCell || !titleCell) continue;
+            const dateText = appliedDateCell.textContent.trim();
+            const titleText = titleCell.textContent.trim();
+            if (dateText === targetDateTime && titleText === targetTitle) {
+              const a = row.querySelector("td:nth-child(6) a");
+              if (a) {
+                const href = a.getAttribute("href");
+                const full = href.startsWith("http") ? href : location.origin + href;
+                location.href = full;
+                return;
+              } else {
+                throw new Error("一致する応募者リンクが見つかりません");
+              }
+            }
+          }
+          throw new Error(
+            "指定の求人タイトルと応募日時に一致する行が見つかりませんでした"
+          );
+        })();
+      waitBefore: 1500
+      returnValue: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # --- 詳細から項目抽出 ---
+    +inject_script_1:
+      action>: InjectScript
+      display_name>: JS_詳細抽出
+      browser: "+go_to_1"
+      code: |
+        new Promise(function(resolve, reject) {
+          function waitFor(sel, ms) {
+            return new Promise(function(res, rej) {
+              var st = Date.now(),
+                t = setInterval(function() {
+                  if (document.querySelector(sel)) {
+                    clearInterval(t);
+                    res();
+                  } else if (Date.now() - st > ms) {
+                    clearInterval(t);
+                    rej("要素待ちタイムアウト: " + sel);
+                  }
+                }, 100);
+            });
+          }
+          function getTextByLabel(label) {
+            var cells = document.querySelectorAll("table td");
+            for (var i = 0; i < cells.length; i++) {
+              if (cells[i].textContent.trim() === label) {
+                return cells[i + 1] ? cells[i + 1].textContent.trim() : "";
+              }
+            }
+            return "";
+          }
+          waitFor(".card-block", 15000)
+            .then(function() {
+              var rawBlock = getTextByLabel("応募者");
+              var nameLines = rawBlock.split(/\n/);
+              var kanaLine = nameLines[0] ? nameLines[0].trim() : "";
+              var kanjiLine = nameLines[1] ? nameLines[1].trim() : "";
+              var kanaParts = kanaLine.replace(/\u3000/g, " ").split(/\s+/);
+              var kanaLast = kanaParts[0] || "";
+              var kanaFirst = kanaParts[1] || "";
+              var kanjiClean = kanjiLine.replace(/（.*?）/, "").trim();
+              var kanjiParts = kanjiClean.split(/\s+/);
+              var kanjiLast = kanjiParts[0] || "";
+              var kanjiFirst = kanjiParts[1] || "";
+              var ageMatch = kanjiLine.match(/（(\d+)歳/);
+              var age = ageMatch ? parseInt(ageMatch[1], 10) : null;
+              var genderMatch = kanjiLine.match(/（\d+歳(男性|女性)）/);
+              var gender = genderMatch ? genderMatch[1] : "";
+              var fullAddress = getTextByLabel("住所").replace(/\s+/g, " ");
+              var prefectureMatch = fullAddress.match(/〒\s*[\d\-]+\s*(.+?[都道府県])/);
+              var cityMatch = fullAddress.match(/[都道府県](.+)/);
+              var postalMatch = fullAddress.match(/〒\s*([\d\-]+)/);
+              var postalCode = postalMatch ? postalMatch[1] : "";
+              var rawDateTime = getTextByLabel("応募日時");
+              var formattedDateTime = "";
+              if (rawDateTime) {
+                var dt = rawDateTime.trim().replace(/\//g, "-");
+                var parts = dt.split(" ");
+                var datePart = parts[0];
+                var time = parts[1] || "00:00";
+                formattedDateTime = datePart + "T" + time + ":00.000+0900";
+              }
+              var output = {
+                Field1__c: kanjiLast,
+                Field2__c: kanjiFirst,
+                Field3__c: kanaLast,
+                Field4__c: kanaFirst,
+                Field5__c: getTextByLabel("電話番号"),
+                Field6__c: getTextByLabel("メールアドレス"),
+                State__c: prefectureMatch ? prefectureMatch[1] : "",
+                City__c: cityMatch ? cityMatch[1] : "",
+                PostCode__c: postalCode,
+                Field20__c: age,
+                Field54__c: gender,
+                Field8__c: formattedDateTime,
+                Field9__c: "WEB",
+                Field17__c: "ラコット",
+                Field10__c: "0017F00002T9bnqQAB",
+                Field25__c: "BaseUpp",
+                Field45__c: "本社",
+                RecordTypeId: "0127F000000KJofQAG",
+                Field7__c: "現在の職業：" + getTextByLabel("現在の職業")
+              };
+              resolve({ sf: output });
+            })
+            .catch(function(e) {
+              reject("DOM抽出失敗: " + e);
+            });
+        });
+      waitBefore: 1500
+      returnValue: true
+      private: true
+      meta:
+        action:
+          disabled: false
+
+    # 保存_sfObj
+    +store_value_2:
+      action>: StoreValue
+      display_name>: 保存_sfObj
+      key: sfObj
+      value: "+inject_script_1"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # ブラウザを閉じる
+    +close_browser_1:
+      action>: CloseBrowser
+      display_name>: ブラウザを閉じる
+      browser: "+click_1"
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # --- Salesforce 連携 ---
+    +salesforce_query_1:
+      action>: SalesforceQuery
+      display_name>: SF_求人取得
+      provider: sfdc_5d1544566cbf9f61b0d2
+      query: SELECT Id, job_number__c, Name, Field1743__c, ChargeOfBase__c FROM JobOffer__c
+        WHERE job_number__c =  '${kyujinNo}' LIMIT 1
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 保存_求人
+    +store_value_3:
+      action>: StoreValue
+      display_name>: 保存_求人
+      key: kyujinRecord
+      value: "+salesforce_query_1"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # IF_求人OBJが存在
+    +if_1:
+      if>:
+        display_name>: IF_求人OBJが存在
+        condition: "${kyujinRecord.length}"
+        private: false
+      meta:
+        action:
+          disabled: false
+      _do:
+
+        # sfObj整形
+        +run_script_2:
+          action>: RunScript
+          display_name>: sfObj整形
+          code: |
+            sfObj.sf.Field19__c = kyujinRecord[0].Id;
+            sfObj.sf.Field45__c = kyujinRecord[0].Field1743__c;
+            sfObj.sf.Field25__c = kyujinRecord[0].ChargeOfBase__c;
+            sfObj.sf.SendEntryMail__c = true;
+            return sfObj;
+          private: false
+          meta:
+            action:
+              disabled: false
+
+        # 保存_sfObj更新
+        +store_value_5:
+          action>: StoreValue
+          display_name>: 保存_sfObj更新
+          key: sfObj
+          value: "+run_script_2"
+          setIfNotDefined: false
+          private: false
+          meta:
+            action:
+              disabled: false
+
+    # SF_応募レコード作成
+    +salesforce_create_record_1:
+      action>: SalesforceCreateRecord
+      display_name>: SF_応募レコード作成
+      provider: sfdc_5d1544566cbf9f61b0d2
+      object: Entry__c
+      data: "${sfObj.sf}"
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 保存_LastID更新
+    +data_store_save_1:
+      action>: DataStoreSave
+      display_name>: 保存_LastID更新
+      key: lastId_AIRWORK
+      value: "${mailId}"
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # IF_姓名分離不可
+    +if_2:
+      if>:
+        display_name>: IF_姓名分離不可
+        condition: "${sfObj.nameHasNotBlank}"
+        private: false
+      meta:
+        action:
+          disabled: false
+      _do:
+
+        # 取得_作成ID
+        +get_value_with_key_1:
+          action>: GetValueWithKey
+          display_name>: 取得_作成ID
+          object: "+salesforce_create_record_1"
+          key: id
+          private: false
+          meta:
+            action:
+              disabled: false
+
+        # 保存_entryId
+        +store_value_6:
+          action>: StoreValue
+          display_name>: 保存_entryId
+          key: entryId
+          value: "+get_value_with_key_1"
+          setIfNotDefined: false
+          private: false
+          meta:
+            action:
+              disabled: false
+
+        # Slack文_姓名分離不可
+        +text_1:
+          action>: Text
+          display_name>: Slack文_姓名分離不可
+          text: |-
+            ※ブルカラ姓名分離※
+            以下のレコードで、姓と名が分離できませんでした。ご確認をお願い致します。
+            https://upthemark.lightning.force.com/lightning/r/Entry__c/${entryId}/view
+          private: false
+          meta:
+            action:
+              disabled: false
+
+        # Slack送信_姓名分離
+        +send_slack_message_1:
+          action>: SendSlackMessage
+          display_name>: Slack送信_姓名分離
+          provider: slack_1d02f58ac5dff80799f9
+          channel: "#システムerror通知"
+          text: "+text_1"
+          send_select: false
+          response_message: false
+          private: false
+          meta:
+            action:
+              disabled: false
+
+# ===== 例外時通知 =====
++if_3:
+  if>:
+    display_name>: IF_エラー
+    condition: "${isErr}"
+    private: false
+  meta:
+    action:
+      disabled: false
+  _do:
+
+    # エラー文生成
+    +run_script_3:
+      action>: RunScript
+      display_name>: エラー文生成
+      code: |
+        const r = { 求人: "", 広告: "" };
+        try {
+          if (!kyujinRecord.length && !!sfObj.sf) {
+            r.求人 =
+              "求人オブジェクトに求人No「" +
+              (sfObj.sf.Field19__c || "") +
+              "」が存在しませんでした。";
+          } else if (!kyujinRecord.length) {
+            r.求人 = "求人Noが取得できませんでした";
+          }
+        } catch (e) {}
+        return r;
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 保存_エラー文
+    +store_value_12:
+      action>: StoreValue
+      display_name>: 保存_エラー文
+      key: er
+      value: "+run_script_3"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # Slack文_エラー
+    +text_2:
+      action>: Text
+      display_name>: Slack文_エラー
+      text: |-
+        ブルカラ→SFへの転記でエラーが発生しました。
+        エラーメッセージ：${isErr.message}
+        該当応募者URL
+        ${OuboListURL}
+
+        備考（あれば↓に文字が入ります）
+        ${er.広告}
+        ${er.求人}
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # Slack送信_エラー
+    +send_slack_message_2:
+      action>: SendSlackMessage
+      display_name>: Slack送信_エラー
+      provider: slack_1d02f58ac5dff80799f9
+      channel: "#システムerror通知"
+      text: "+text_2"
+      send_select: false
+      response_message: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+# ===== 終了時刻 =====
++get_time_2:
+  action>: GetTime
+  display_name>: 日時を取得_終了時刻
+  format: YYYY-MM-DD HH:mm:ss.SSS
+  timezone: Asia/Tokyo
+  relativeTime: ''
+  private: false
+  meta:
+    action:
+      disabled: false

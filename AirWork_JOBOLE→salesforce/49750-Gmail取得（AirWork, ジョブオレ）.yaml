@@ -1,0 +1,123 @@
+# 日時を取得_開始時刻確認用（一時的に設置
++get_time_1:
+  action>: GetTime
+  format: 'YYYY-MM-DD HH:mm:ss.SSS'
+  timezone: 'Asia/Tokyo'
+  relativeTime: ''
+
+# ※手動再実行時ご確認ください：メンテナンスだった場合の手動再実行時は、値に「メンテ」とご記入後手動実行ください。実行後、値を消してワークフローを保存ください
++store_value_2:
+  action>: StoreValue
+  key: maintenance
+  value: ''
+
+# スクリプトを実行_各種パラメータ
++run_script_3:
+  action>: RunScript
+  code: "const HH = parseInt(\n  moment()\n    .utcOffset(540)\n    .format(\"HH\")\n);\nconst mm = parseInt(\n  moment()\n    .utcOffset(540)\n    .format(\"mm\")\n);\n// 実行時間判定\nconst isMorning = HH === 7 && mm < 20;\nconst isEvening = HH === 18 && mm < 20;\n\nconst unixTime = moment()\n  .utcOffset(540)\n  .unix();\n\n//gmailクエリで使うunixTime, 先頭に空白あり\nlet after = \" after:\";\nlet mailLimit = 20;\nif (isMorning) {\n  after += String(unixTime - 3600 * 13); //13時間前以降に受信したメールのみ取得\n  mailLimit = 100;\n} else if (isEvening) {\n  after += String(unixTime - 3600 * 10); //10時間前以降に受信したメールのみ取得\n  mailLimit = 100;\n} else {\n  after += String(unixTime - 1200); //5分おき実行時。20分前以降に受信したメールのみ取得\n}\n\n//メンテだった場合\nif (maintenance === \"メンテ\") {\n  after += String(unixTime - 3600 * 36); //36時間前以降に受信したメールのみ取得\n  mailLimit = 150;\n}\n\nconst queueRows = [\n  {\n    datastore: \"lastId_AIRWORK\",\n    query: \"subject:【Airワーク 採用管理】求人への応募がありました\" + after,\n    mailLimit: mailLimit,\n    wfid: 49751\n  },\n  {\n    datastore: \"lastId_JOBOLE\",\n    query: \"subject:【JOBOLE(ジョブオレ)】応募がありました。\" + after,\n    mailLimit: mailLimit,\n    wfid: 49753\n  }\n];\nreturn queueRows;\n"
+
+# 各要素について繰り返す
++for_each_1:
+  for_each>:
+    param: +run_script_3
+    withIndex: index
+  _do:
+
+    # Gmailを取得 AIRWORK
+    +gmail_get_1:
+      action>: GmailGet
+      query: ${param.query}
+      provider: gsmail_9f26688d5bb5f79fd8e9
+      limit: ${param.mailLimit}
+      meta:
+        display:
+          provider:
+            type: chip
+            label: 'Gmail for Google Workspace (y_itasaka@upthemark.com)'
+            icon: gsmail
+
+    # 真のとき_新規メールがある
+    +if_2:
+      if>: +gmail_get_1
+      _do:
+
+        # 変数に保存
+        +store_value_1:
+          action>: StoreValue
+          key: mails
+          value: +gmail_get_1
+
+        # データを取得する_AIRWORKの処理済みメールのID
+        +data_store_get_1:
+          action>: DataStoreGet
+          key: ${param.datastore}
+
+        # 指定のIDより前にあるデータを取得
+        +call_custom_action_1:
+          action>: CallCustomAction
+          id: ca_37191e4a9dc28b59b752
+          params:
+            jsonArray: +gmail_get_1
+            lastId: +data_store_get_1
+          meta:
+            version: '2021-08-04T03:12:19.000Z'
+            interface:
+              params:
+                jsonArray: Text
+                lastId: Text
+              output: Anything
+              pickers:
+            display:
+              id:
+                type: chip
+                label: '指定のIDより前にあるデータを取得'
+                icon: build
+                imageUrl: ''
+                color: '#AD1457'
+
+        # 変数に保存_処理していないメールのみ抽出
+        +store_value_3:
+          action>: StoreValue
+          key: queueData
+          value: +call_custom_action_1
+
+        # テキストを作成 ログ用
+        +text_1:
+          action>: Text
+          text: "取得したメールの数：${mails.length}\n未処理メールの数：${queueData.length}"
+
+        # 真のとき_AIRWORKでSF転記実行
+        +if_1:
+          if>: ${queueData.length}
+          _do:
+
+            # スクリプトを実行
+            +run_script_2:
+              action>: RunScript
+              code: "return {\n  mails: queueData\n};\n"
+
+            # 変数に保存
+            +store_value_4:
+              action>: StoreValue
+              key: obj
+              value: +run_script_2
+
+            # ワークフローを実行する
+            +add_to_queue_1:
+              action>: AddToQueue
+              workflow_id: ${param.wfid}
+              params: ${obj}
+              meta:
+                display: null
+
+            # スクリプトを実行_確認用_処理対象のメールID
+            +run_script_1:
+              action>: RunScript
+              code: "return queueData.map(row => [row.subject, row.id, row.date]);\n"
+
+# 日時を取得_終了時刻
++get_time_2:
+  action>: GetTime
+  format: 'YYYY-MM-DD HH:mm:ss.SSS'
+  timezone: 'Asia/Tokyo'
+  relativeTime: ''

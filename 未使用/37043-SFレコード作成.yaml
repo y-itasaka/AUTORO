@@ -1,0 +1,16 @@
+# レコードを作成する
++salesforce_create_record_1:
+  action>: SalesforceCreateRecord
+  provider: sfdc_5d1544566cbf9f61b0d2
+  object: Account
+  data: "{\n\"Name\":\"テスト99999\",\n\"Field5__c\":\"前\",\n\"Field6__c\":\"株式会社\",\n\"ChargeOfBase123__c\":\"FUKUI\",\n\"Field95__c\":\"本社\",\n\"Phone\":999999\n}\n"
+  meta:
+    display:
+      provider:
+        type: chip
+        label: 'Salesforce (y_itasaka@upthemark.com)'
+        icon: salesforce
+      object:
+        label: '1. 企業・個人'
+        icon: salesforce
+        type: chip

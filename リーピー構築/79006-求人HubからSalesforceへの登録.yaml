@@ -1,0 +1,510 @@
+# 実際のメール内容
++text_1:
+  action>: Text
+  display_name>: '実際のメール内容'
+  text: ${mailBody}
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# メール内容を保存
++store_value_7:
+  action>: StoreValue
+  display_name>: 'メール内容を保存'
+  key: mailBody
+  value: +text_1
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 名前、IDを取得する
++run_script_3:
+  action>: RunScript
+  display_name>: '名前、IDを取得する'
+  code: "const nameMatch = mailBody.match(/(.+?)\\s*様/);\nconst fullName = nameMatch ? nameMatch[1].trim() : \"\";\n\nconst jobIdMatch = mailBody.match(/(?<=求人ID：)\\d+/);\nconst jobId = jobIdMatch ? jobIdMatch[0] : \"\";\n\nconst result = [fullName, jobId];\nreturn result;\n"
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 応募者情報
++store_value_1:
+  action>: StoreValue
+  display_name>: '応募者情報'
+  key: applicant
+  value: +run_script_3
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# テキストを作成
++text_4:
+  action>: Text
+  display_name>: 'テキストを作成'
+  text: 'IDから、求人Hubから情報を収集する　↓'
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 求人Hubのブラウザを開く
++open_browser_1:
+  action>: OpenBrowser
+  display_name>: '求人Hubのブラウザを開く'
+  url: 'https://kyujin-hub.basemachina.com/auth/login?callbackUrl=https%3A%2F%2Fkyujin-hub.basemachina.com%2Fprojects%2Fcnn9u5a9io6g00dke2q0%2Fenvironments%2Fcqd05ui9io6g008rhha0%2Fviews%2Fentries-table-page'
+  lang: 'ja-JP'
+  timeZone: 'Asia/Tokyo'
+  headless: true
+  confirm: true
+  windowSize: '1920 x 1080'
+  useShadowDomSelector: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# IDを文字入力
++type_text_1:
+  action>: TypeText
+  display_name>: 'IDを文字入力'
+  browser: +open_browser_1
+  selector: 'input[name="email"]'
+  text: 's_itakura@upthemark.com'
+  clearValue: false
+  ignoreError: true
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# クリック
++click_2:
+  action>: Click
+  display_name>: 'クリック'
+  browser: +type_text_1
+  selector: 'button[type="submit"]'
+  confirm: true
+  waitAfter: 1000
+  ignoreError: true
+  timeout: 30000
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# PWを文字入力
++type_text_2:
+  action>: TypeText
+  display_name>: 'PWを文字入力'
+  browser: +type_text_1
+  selector: 'input[name="password"]'
+  text: shiori5280
+  clearValue: false
+  ignoreError: true
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# クリック
++click_1:
+  action>: Click
+  display_name>: 'クリック'
+  browser: +type_text_2
+  selector: 'button[type="submit"]'
+  confirm: true
+  waitAfter: 6000
+  ignoreError: false
+  timeout: 30000
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# エラーを捕捉する
++try_1:
+  try>:
+    display_name>: 'エラーを捕捉する'
+    errorObjectName: error_hub
+    private: false
+  meta:
+    action:
+      disabled: false
+  _do:
+
+    # 応募タグをクリック
+    +click_6:
+      action>: Click
+      display_name>: '応募タグをクリック'
+      browser: +click_1
+      selector: "//button[.//span[contains(normalize-space(text()), '応募')]]"
+      confirm: false
+      waitAfter: 5000
+      ignoreError: true
+      timeout: 15000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 応募者一覧をクリック
+    +click_3:
+      action>: Click
+      display_name>: '応募者一覧をクリック'
+      browser: +click_1
+      selector: "//li[contains(text(), '応募者一覧')]"
+      confirm: false
+      waitAfter: 6000
+      ignoreError: true
+      timeout: 15000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # csvのハンバーガーメニューをクリック
+    +click_7:
+      action>: Click
+      display_name>: 'csvのハンバーガーメニューをクリック'
+      browser: +click_3
+      selector: 'iframe.w-full >> button.rounded-md.p-1'
+      confirm: true
+      waitAfter: 6000
+      ignoreError: false
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # csvを落とすクリック
+    +click_5:
+      action>: Click
+      display_name>: 'csvを落とすクリック'
+      browser: +click_7
+      selector: 'iframe.w-full >> button.text-gray-700'
+      confirm: true
+      waitAfter: 8000
+      ignoreError: false
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # ダウンロードファイル一覧
+    +get_download_files_1:
+      action>: GetDownloadFiles
+      display_name>: 'ダウンロードファイル一覧'
+      order: ASC
+      sort_by: FILENAME
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存
+    +store_value_2:
+      action>: StoreValue
+      display_name>: '変数に保存'
+      key: csv_filename
+      value: +get_download_files_1
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # ファイルを保存
+    +save_file_1:
+      action>: SaveFile
+      display_name>: 'ファイルを保存'
+      provider: local
+      filename: ${csv_filename}
+      createPath: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存
+    +store_value_3:
+      action>: StoreValue
+      display_name>: '変数に保存'
+      key: csv_file_data
+      value: +save_file_1
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # ファイルを取得
+    +get_file_1:
+      action>: GetFile
+      display_name>: 'ファイルを取得'
+      provider: local
+      filename: ${csv_file_data['file_id']}
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # CSVを読み込む
+    +read_c_s_v_1:
+      action>: ReadCSV
+      display_name>: 'CSVを読み込む'
+      filename: +get_file_1
+      headers: true
+      encoding: utf8
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存
+    +store_value_4:
+      action>: StoreValue
+      display_name>: '変数に保存'
+      key: csv_file_data
+      value: +read_c_s_v_1
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # メール受信した応募者だけの配列にする
+    +run_script_1:
+      action>: RunScript
+      display_name>: 'メール受信した応募者だけの配列にする'
+      code: "function normalizeBase(s) {\n  if (s == null) return '';\n  return String(s)\n    .replace(/\\u200B/g, '')        // ゼロ幅スペース\n    .replace(/\\r?\\n/g, '')         // 改行\n    .replace(/\\u3000/g, ' ')       // 全角→半角スペース\n    .replace(/^\"+|\"+$/g, '')       // 先頭末尾のダブルクォート\n    .trim()\n    .replace(/\\s+/g, ' ')          // 連続空白→1つ\n    .toLowerCase();\n}\nfunction noSpaces(s){ return s.replace(/\\s+/g,''); }\n\nfunction normalizeId(s){\n  return normalizeBase(s).replace(/^0+/, ''); // 先頭ゼロ無視\n}\n\nfunction namesMatch(applName, last, first){\n  const appl = normalizeBase(applName);\n  const appl0 = noSpaces(appl);\n\n  const lnfn  = normalizeBase((last||'') + ' ' + (first||''));\n  const fnln  = normalizeBase((first||'') + ' ' + (last||''));\n  const lnfn0 = noSpaces(lnfn);\n  const fnln0 = noSpaces(fnln);\n\n  return (appl === lnfn || appl === fnln || appl0 === lnfn0 || appl0 === fnln0);\n}\n\nfunction filterById(csv_file_data, applicant){\n  const rows = (csv_file_data || []).slice(1); // ヘッダー除外\n  const applName = applicant[0] || '';\n  const applId   = applicant[1] || '';\n\n  const hit = rows.find(row => {\n    const last  = row[3];  // last_name\n    const first  = row[4]; // first_name\n    const id     = row[1]; // id (UUID想定)\n    const jobId  = row[2]; // job_id（数値/文字列混在）\n\n    const nameOk = namesMatch(applName, last, first);\n    const idOk   = normalizeId(applId) !== '' &&\n                   (normalizeId(applId) === normalizeId(id) || normalizeId(applId) === normalizeId(jobId));\n\n    return nameOk && idOk;\n  });\n\n  return hit ? hit : [];\n}\n\n// 実行\nvar result = filterById(csv_file_data, applicant);\nreturn result;\n"
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 応募者だけの情報
+    +store_value_5:
+      action>: StoreValue
+      display_name>: '応募者だけの情報'
+      key: data
+      value: +run_script_1
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 生年月日から年齢を出して、配列に格納する
+    +run_script_2:
+      action>: RunScript
+      display_name>: '生年月日から年齢を出して、配列に格納する'
+      code: "function calculateAge(birthDate) {\n  var today = new Date();\n  var birthDate = new Date(birthDate);\n  var age = today.getFullYear() - birthDate.getFullYear();\n  var monthDiff = today.getMonth() - birthDate.getMonth();\n\n  if (\n    monthDiff < 0 ||\n    (monthDiff === 0 && today.getDate() < birthDate.getDate())\n  ) {\n    age--;\n  }\n\n  return age;\n}\n\nfunction formatDateTime(dateTime) {\n  var date = new Date(dateTime);\n  date.setHours(date.getHours() - 9); // 9時間プラス\n\n  var year = date.getFullYear();\n  var month = (\"0\" + (date.getMonth() + 1)).slice(-2);\n  var day = (\"0\" + date.getDate()).slice(-2);\n  var hours = (\"0\" + date.getHours()).slice(-2);\n  var minutes = (\"0\" + date.getMinutes()).slice(-2);\n\n  return year + \"-\" + month + \"-\" + day + \"T\" + hours + \":\" + minutes;\n}\n\nvar age = calculateAge(data[8]);\ndata.push(age);\n\nvar formattedDateTime = formatDateTime(data[16]);\ndata.push(formattedDateTime);\n\nreturn data;\n"
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存
+    +store_value_6:
+      action>: StoreValue
+      display_name>: '変数に保存'
+      key: data
+      value: +run_script_2
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+# 真のとき
++if_1:
+  if>:
+    display_name>: '真のとき'
+    condition: ${error_hub}
+    private: false
+  meta:
+    action:
+      disabled: false
+  _do:
+
+    # テキストを作成
+    +text_3:
+      action>: Text
+      display_name>: 'テキストを作成'
+      text: "◾️求人Hubからのデータ取得に失敗しましたので、ご確認お願いいたします。\n\n\n求人ID：${applicant[1]}\n求人Hubのリンク：https://kyujin-hub.basemachina.com/projects/cnn9u5a9io6g00dke2q0/environments/cqd05ui9io6g008rhha0/views/entries-table-page"
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # Gmailを送信する
+    +gmail_send_1:
+      action>: GmailSend
+      display_name>: 'Gmailを送信する'
+      provider: gsmail_9f26688d5bb5f79fd8e9
+      to: 's_itakura@upthemark.com,m_hirota@upthemark.com'
+      subject: '【エラー通知】株式会社リーピー：求人Hubデータの取得に失敗しました'
+      body: +text_3
+      attachments: ''
+      from: ''
+      contentType: Text
+      private: false
+      meta:
+        display:
+          provider:
+            type: chip
+            label: 'Gmail for Google Workspace (y_itasaka@upthemark.com)'
+            icon: gsmail
+        action:
+          disabled: false
+
+# テキストを作成
++text_6:
+  action>: Text
+  display_name>: 'テキストを作成'
+  text: '求人IDを取得しに行く'
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# クエリを実行する
++salesforce_query_1:
+  action>: SalesforceQuery
+  display_name>: 'クエリを実行する'
+  provider: sfdc_b6f0820e33c98da786f2
+  query: "SELECT Id, Name, job_number__c FROM JobOffer__c WHERE job_number__c = '${data[2]}'"
+  private: false
+  meta:
+    display:
+      provider:
+        type: chip
+        label: 'Salesforce (s_itakura@upthemark.com (login.salesforce.com))'
+        icon: salesforce
+    action:
+      disabled: false
+
+# 変数に保存
++store_value_8:
+  action>: StoreValue
+  display_name>: '変数に保存'
+  key: Job_all
+  value: +salesforce_query_1
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# スクリプトを実行
++run_script_4:
+  action>: RunScript
+  display_name>: 'スクリプトを実行'
+  code: "const jobId = Job_all[0].Id;\nreturn jobId;\n"
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 求人ID
++store_value_9:
+  action>: StoreValue
+  display_name>: '求人ID'
+  key: Job_id
+  value: +run_script_4
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# テキストを作成
++text_2:
+  action>: Text
+  display_name>: 'テキストを作成'
+  text: '取得した情報をSalesforceに登録　↓'
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# エラーを捕捉する
++try_2:
+  try>:
+    display_name>: 'エラーを捕捉する'
+    errorObjectName: error_sales
+    private: false
+  meta:
+    action:
+      disabled: false
+  _do:
+
+    # Salesforceに登録
+    +salesforce_create_record_2:
+      action>: SalesforceCreateRecord
+      display_name>: 'Salesforceに登録'
+      provider: sfdc_b6f0820e33c98da786f2
+      object: Entry__c
+      data: "{\n  \"Field6__c\": \"${data[13]}\",\n  \"Field2__c\": \"${data[4]}\",\n  \"Field4__c\": \"${data[6]}\",\n  \"Field1__c\": \"${data[3]}\",\n  \"Field3__c\": \"${data[5]}\",\n  \"Field9__c\": \"WEB\",\n  \"birthday__c\": \"${data[8]}\",\n  \"RecordTypeId\": \"0127F000000KJofQAG\",\n  \"Field10__c\": \"0017F00002T9bnqQAB\",\n  \"Field17__c\": \"求人Hub\",\n  \"Field54__c\": \"${data[7]}\",\n  \"Field5__c\": \"${data[14]}\",\n  \"Field19__c\": \"${Job_id}\",\n  \"Field20__c\": \"${data[17]}\",\n  \"Field8__c\": \"${data[18]}\",\n  \"PostCode__c\": \"${data[12]}\",\n  \"State__c\": \"${data[9]}\",\n  \"City__c\": \"${data[10]}\",\n  \"Street__c\": \"${data[11]}\",\n  \"InflowSource__c\": \"求人Hub\",\n\"SendEntryMail__c\": \"true\",\n\"EntryJobOfferNumber__c\": \"${data[2]}\",\n\n\"Field25__c\": \"BaseUpp\",\n\"Field45__c\": \"本社\"\n}"
+      private: false
+      meta:
+        display:
+          provider:
+            type: chip
+            label: 'Salesforce (s_itakura@upthemark.com (login.salesforce.com))'
+            icon: salesforce
+          object:
+            label: 'エントリー'
+            icon: salesforce
+            type: chip
+        action:
+          disabled: false
+
+# 真のとき
++if_2:
+  if>:
+    display_name>: '真のとき'
+    condition: ${error_sales}
+    private: false
+  meta:
+    action:
+      disabled: false
+  _do:
+
+    # テキストを作成
+    +text_5:
+      action>: Text
+      display_name>: 'テキストを作成'
+      text: "◾️Salesforceの登録時にエラーが発生しましたので、ご確認お願いいたします。\n\n\n求人ID：${applicant[1]}\n求人Hubのリンク：https://kyujin-hub.basemachina.com/projects/cnn9u5a9io6g00dke2q0/environments/cqd05ui9io6g008rhha0/views/entries-table-page"
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # Gmailを送信する
+    +gmail_send_2:
+      action>: GmailSend
+      display_name>: 'Gmailを送信する'
+      provider: gsmail_9f26688d5bb5f79fd8e9
+      to: 's_itakura@upthemark.com,m_hirota@upthemark.com'
+      subject: '【エラー通知】株式会社リーピー：Salesforceの登録に失敗しました'
+      body: +text_5
+      attachments: ''
+      from: ''
+      contentType: Text
+      private: false
+      meta:
+        display:
+          provider:
+            type: chip
+            label: 'Gmail for Google Workspace (y_itasaka@upthemark.com)'
+            icon: gsmail
+        action:
+          disabled: false

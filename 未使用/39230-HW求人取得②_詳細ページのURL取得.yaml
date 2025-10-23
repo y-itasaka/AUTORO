@@ -1,0 +1,42 @@
+# 既存のスプレッドシートを取得
++get_spreadsheet_1:
+  action>: GetSpreadsheet
+  provider: ''
+  spreadsheet_id: ''
+
+# セルの値を取得_URLの一覧をすべて取得
++get_cells_1:
+  action>: GetCells
+  spreadsheet: +get_spreadsheet_1
+  range: 'A1:A'
+
+# 各要素について繰り返す
++for_each_1:
+  for_each>:
+    url: +get_cells_1
+  _do:
+
+    # ブラウザを開く_求人詳細ページを開く
+    +open_browser_1:
+      action>: OpenBrowser
+      url: ${url}
+      lang: 'ja-JP'
+      headless: true
+
+    # テキストを取得_会社名
+    +get_text_1:
+      action>: GetText
+      browser: +open_browser_1
+      selector: ''
+      ignoreError: true
+
+    # ブラウザを閉じる
+    +close_browser_1:
+      action>: CloseBrowser
+      browser: +open_browser_1
+
+    # クエリを実行する
+    +salesforce_query_1:
+      action>: SalesforceQuery
+      provider: ''
+      query: "select Name, Id\nfrom Account\nwhere \nName = 'ヒューマン・デザイン' & Pref = '福井県' & City = '福井市'  & Phone = '0776-35-8230' OR \nName = 'ヒューマン・デザイン' & Pref = '福井県' & City = '福井市'  & Phone = '0776358230'"

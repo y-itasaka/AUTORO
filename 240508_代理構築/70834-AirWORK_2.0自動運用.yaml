@@ -1,0 +1,2252 @@
+# スクリプトを実行
++run_script_11:
+  action>: RunScript
+  display_name>: スクリプトを実行
+  code: |
+    let roundedResult = Math.round(SouRoudouZikan); // 四捨五入
+
+    console.log(roundedResult); // 出力: 四捨五入された数値
+
+    return roundedResult;
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存
++store_value_16:
+  action>: StoreValue
+  display_name>: 変数に保存
+  key: x_SouroudouZikan
+  value: "+run_script_11"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# スクリプトを実行
++run_script_10:
+  action>: RunScript
+  display_name>: スクリプトを実行
+  code: "// 置換対象のテキスト\nlet text = Skill_Kangei;\n// 置換を実行\nlet result = text\n  .replace(/国籍不問/g,
+    \"外国人OK\")\n  .replace(/外国籍/g, \"外国人\")\n  .replace(/⑴/g, \"(1)\")\n  .replace(/⒈/g,
+    \"(1)\")\n  .replace(/㈠/g, \"(1)\")\n  .replace(/㊀/g, \"(1)\")\n  .replace(/⓵/g,
+    \"(1)\")\n  .replace(/\U0001F3B6/g, \"✨\")\n  .replace(/\U0001F601/g, \"✨\")\n
+    \ .replace(/❤︎/g, \"✨\")\n  .replace(/⁉/g, \"✨\")\n  .replace(/❕/g, \"✨\")\n  .replace(/↳/g,
+    \"→\")\n  .replace(/\U0001F51B/g, \"<->\")\n  .replace(/⏩/g, \"→\")\n  .replace(/⭐️/g,
+    \"✨\");\n// 結果をコンソールに出力\nconsole.log(result);\n// アウトプット\nreturn result;\n"
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存
++store_value_15:
+  action>: StoreValue
+  display_name>: 変数に保存
+  key: KangeiJouken
+  value: "+run_script_10"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# スクリプトを実行
++run_script_9:
+  action>: RunScript
+  display_name>: スクリプトを実行
+  code: "// 置換対象のテキスト\nlet text = sigotonaiyou;\n// 置換を実行\nlet result = text\n  .replace(/国籍不問/g,
+    \"外国人OK\")\n  .replace(/外国籍/g, \"外国人\")\n  .replace(/⑴/g, \"(1)\")\n  .replace(/⒈/g,
+    \"(1)\")\n  .replace(/㈠/g, \"(1)\")\n  .replace(/㊀/g, \"(1)\")\n  .replace(/⓵/g,
+    \"(1)\")\n  .replace(/\U0001F3B6/g, \"✨\")\n  .replace(/\U0001F601/g, \"✨\")\n
+    \ .replace(/❤︎/g, \"✨\")\n  .replace(/⁉/g, \"✨\")\n  .replace(/❕/g, \"✨\")\n  .replace(/↳/g,
+    \"→\")\n  .replace(/\U0001F51B/g, \"<->\")\n  .replace(/⏩/g, \"→\")\n  .replace(/⭐️/g,
+    \"✨\");\n// 結果をコンソールに出力\nconsole.log(result);\n// アウトプット\nreturn result;\n"
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存
++store_value_14:
+  action>: StoreValue
+  display_name>: 変数に保存
+  key: GyoumuShousai
+  value: "+run_script_9"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# スクリプトを実行
++run_script_8:
+  action>: RunScript
+  display_name>: スクリプトを実行
+  code: |
+    let text = ShokubaFuniki;
+    let result = text.substring(0, 120) + "..."; // 最初の127文字を取得
+    console.log(result); // 出力: "Hello"
+    return result;
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存
++store_value_13:
+  action>: StoreValue
+  display_name>: 変数に保存
+  key: ShokubanoFuniki
+  value: "+run_script_8"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# スクリプトを実行
++run_script_7:
+  action>: RunScript
+  display_name>: スクリプトを実行
+  code: |
+    // 置換対象のテキスト
+    let text = title;
+    // 置換を実行
+    let result = text
+      .replace(/\//g, "｜")
+      .replace(/／/g, "｜")
+      .replace(/「/g, "（")
+      .replace(/」/g, "）")
+      .replace(/＜/g, "（")
+      .replace(/＞/g, "）")
+      .replace(/【/g, "（")
+      .replace(/】/g, "）")
+      .replace(/『/g, "（")
+      .replace(/』/g, "）")
+      .replace(/\[/g, "（")
+      .replace(/\]/g, "）")
+      .replace(/＊/g, "")
+      .replace(/\*/g, "")
+      .replace(/！/g, "")
+      .replace(/#/g, "")
+      .replace(/¥/g, "")
+      .replace(/⭐︎/g, "")
+      .replace(/★/g, "")
+      .replace(/☆/g, "")
+      .replace(/♪/g, "")
+      .replace(/●/g, "")
+      .replace(/◯/g, "")
+      .replace(/○/g, "")
+      .replace(/◎/g, "")
+      .replace(/■/g, "")
+      .replace(/□/g, "")
+      .replace(/◆/g, "")
+      .replace(/◇/g, "")
+      .replace(/⬛︎/g, "")
+      .replace(/⬜︎/g, "");
+    // 結果をコンソールに出力
+    console.log(result);
+    // アウトプット
+    return result;
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存
++store_value_12:
+  action>: StoreValue
+  display_name>: 変数に保存
+  key: JobTitle
+  value: "+run_script_7"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# スクリプトを実行（勤務形態をAirwork用に変換）
++run_script_6:
+  action>: RunScript
+  display_name>: スクリプトを実行（勤務形態をAirwork用に変換）
+  code: |
+    // 変数KinmuKeitaiの値に基づいて変換を行う関数
+    function convertKinmuKeitai(KinmuKeitai) {
+      switch (KinmuKeitai) {
+        case "交代制":
+          return "シフト制";
+        case "選択可":
+        case "固定":
+          return "固定時間制";
+        default:
+          return KinmuKeitai; // リストにない場合はそのままの値を返す
+      }
+    }
+
+    return convertKinmuKeitai(KinmuKeitai);
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存（勤務形態）
++store_value_5:
+  action>: StoreValue
+  display_name>: 変数に保存（勤務形態）
+  key: KinmuKeitai
+  value: "+run_script_6"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# スクリプトを実行（社会保険リスト作成）
++run_script_2:
+  action>: RunScript
+  display_name>: スクリプトを実行（社会保険リスト作成）
+  code: |
+    let ShakaihokenArray = Shakaihoken.split(";");
+    return ShakaihokenArray;
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存（社会保険）
++store_value_11:
+  action>: StoreValue
+  display_name>: 変数に保存（社会保険）
+  key: Shakaihoken
+  value: "+run_script_2"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# スクリプトを実行
++run_script_1:
+  action>: RunScript
+  display_name>: スクリプトを実行
+  code: |
+    return {
+      アイキャッチURL: EyeCatchUrl__url,
+      アイキャッチ画像: EyeCatchUrl__imag,
+      雇用形態: koyoukeitai,
+      職種名: JobTitle,
+      仕事内容: GyoumuShousai + "　" + pr2 + "　" + pr3,
+      勤務地名: No,
+      郵便番号: address,
+      アクセス: access + "付近",
+      喫煙に関する補足説明: Kituenjo,
+      職場環境の補足説明: ShokubanoFuniki,
+      必須スキル: Skill_Must,
+      歓迎条件: KangeiJouken,
+      求める人材像: Statue,
+      求人キャッチコピー: pr1,
+      採用予定人数: saiyousuu,
+      給与形態: SalaryType,
+      下限金額: Salary1,
+      上限金額: Salary2,
+      給与の補足説明: BU_Salary,
+      総労働時間: "1ヶ月あたり" + x_SouroudouZikan,
+      勤務形態: KinmuKeitai,
+      "勤務時間・シフト・最低勤務期間の補足説明": kinmuzikan_ichiran,
+      "休日・休暇の補足説明": kinmu_ichiran,
+      社会保険: Shakaihoken,
+      福利厚生の補足説明: fukuri_ichiran
+    };
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# ブラウザを開く
++open_browser_1:
+  action>: OpenBrowser
+  display_name>: ブラウザを開く
+  url: https://ats.rct.airwork.net/dashboards
+  lang: ja-JP
+  headless: true
+  confirm: true
+  windowSize: 1280 x 720
+  useShadowDomSelector: true
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 変数に保存
++store_value_2:
+  action>: StoreValue
+  display_name>: 変数に保存
+  key: browser
+  value: "+open_browser_1"
+  setIfNotDefined: false
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# クリック（ログイン）
++click_2:
+  action>: Click
+  display_name>: クリック（ログイン）
+  browser: "+open_browser_1"
+  selector: //a[text()="ログイン"]
+  confirm: true
+  waitAfter: 4000
+  ignoreError: true
+  timeout: 30000
+  private: false
+  meta:
+    action:
+      disabled: false
+
+# 真のとき
++if_5:
+  if>:
+    display_name>: 真のとき
+    condition: ${kyoten==="FUKUI" || shozoku_kyotenn==="UPP本社"}
+    private: false
+  meta:
+    action:
+      disabled: false
+  _do:
+
+    # スクリプトを実行
+    +run_script_3:
+      action>: RunScript
+      display_name>: スクリプトを実行
+      code: |
+        return {
+          email: "jobs@fukui.upthemark.com",
+          phone: "0776959598"
+        };
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存_連絡先
+    +store_value_3:
+      action>: StoreValue
+      display_name>: 変数に保存_連絡先
+      key: contactinfo
+      value: "+run_script_3"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（ID）
+    +type_text_1:
+      action>: TypeText
+      display_name>: 文字入力（ID）
+      browser: "+open_browser_1"
+      selector: input[name="username"]
+      text: upp@fukui_haken123
+      clearValue: false
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # パスワード入力
+    +type_password_1:
+      action>: TypePassword
+      display_name>: パスワード入力
+      browser: "+type_text_1"
+      selector: input[name="password"]
+      password: "********"
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック
+    +click_16:
+      action>: Click
+      display_name>: クリック
+      browser: "+type_password_1"
+      selector: input[value="ログイン"]
+      confirm: true
+      waitAfter: 3000
+      ignoreError: false
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+# 真のとき
++if_6:
+  if>:
+    display_name>: 真のとき
+    condition: ${kyoten==="SAITAMA" || shozoku_kyotenn==="UPP埼玉オフィス"}
+    private: false
+  meta:
+    action:
+      disabled: false
+  _do:
+
+    # スクリプトを実行
+    +run_script_4:
+      action>: RunScript
+      display_name>: スクリプトを実行
+      code: |
+        return {
+          email: "jobs@saitama.upthemark.com",
+          phone: "0485459899"
+        };
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存_連絡先
+    +store_value_6:
+      action>: StoreValue
+      display_name>: 変数に保存_連絡先
+      key: contactinfo
+      value: "+run_script_4"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（ID）
+    +type_text_18:
+      action>: TypeText
+      display_name>: 文字入力（ID）
+      browser: "+open_browser_1"
+      selector: input[name="username"]
+      text: upp@saitama123
+      clearValue: false
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # パスワード入力
+    +type_password_2:
+      action>: TypePassword
+      display_name>: パスワード入力
+      browser: "+type_text_18"
+      selector: input[name="password"]
+      password: "********"
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（ログイン）
+    +click_1:
+      action>: Click
+      display_name>: クリック（ログイン）
+      browser: "+type_password_2"
+      selector: input[value="ログイン"]
+      confirm: true
+      waitAfter: 3000
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+# 真のとき
++if_11:
+  if>:
+    display_name>: 真のとき
+    condition: ${kyoten==="OSAKA" || shozoku_kyotenn==="UPP大阪オフィス"}
+    private: false
+  meta:
+    action:
+      disabled: false
+  _do:
+
+    # スクリプトを実行
+    +run_script_5:
+      action>: RunScript
+      display_name>: スクリプトを実行
+      code: |
+        return {
+          email: "jobs_osaka@upp.upthemark.com",
+          phone: "0677122679"
+        };
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存_連絡先
+    +store_value_10:
+      action>: StoreValue
+      display_name>: 変数に保存_連絡先
+      key: contactinfo
+      value: "+run_script_5"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（ID）
+    +type_text_21:
+      action>: TypeText
+      display_name>: 文字入力（ID）
+      browser: "+open_browser_1"
+      selector: input[name="username"]
+      text: upp@osaka123
+      clearValue: false
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # パスワード入力
+    +type_password_3:
+      action>: TypePassword
+      display_name>: パスワード入力
+      browser: "+type_text_21"
+      selector: input[name="password"]
+      password: "********"
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（ログイン）
+    +click_25:
+      action>: Click
+      display_name>: クリック（ログイン）
+      browser: "+type_password_3"
+      selector: input[value="ログイン"]
+      confirm: true
+      waitAfter: 3000
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+# 真のとき（status01が掲載開始）
++if_1:
+  if>:
+    display_name>: 真のとき（status01が掲載開始）
+    condition: ${status01==="掲載開始"}
+    private: false
+  meta:
+    action:
+      disabled: false
+  _do:
+
+    # 既存のスプレッドシートを取得（突合表）
+    +get_spreadsheet_1:
+      action>: GetSpreadsheet
+      display_name>: 既存のスプレッドシートを取得（突合表）
+      provider: gsheet_03b0cec6f34fd40f463b
+      spreadsheet_id: 1zX8ofS9f05yIxe_RomTvqa8Isa1FfHKBPI8ZEUqh6xY
+      private: false
+      meta:
+        display:
+          provider:
+            type: chip
+            label: Google Spreadsheet (y_itasaka@upthemark.com)
+            icon: googlespreadsheet
+          spreadsheet_id:
+            label: 突合表（robotic)
+            icon: text
+            type: chip
+        action:
+          disabled: false
+
+    # セルの値を取得（雇用形態）
+    +get_cells_1:
+      action>: GetCells
+      display_name>: セルの値を取得（雇用形態）
+      spreadsheet: "+get_spreadsheet_1"
+      range: 雇用形態!A2:B15
+      findAll: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # テーブルデータ（二次元配列）を変換
+    +convert_table_1:
+      action>: ConvertTable
+      display_name>: テーブルデータ（二次元配列）を変換
+      header: false
+      table: "+get_cells_1"
+      transform:
+      - type: filter
+        column: '0'
+        operator: "=="
+        operand: "${koyoukeitai}"
+        include_blank: false
+      - type: column
+        columns:
+          '0': '0'
+          '1': '1'
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存_雇用形態
+    +store_value_1:
+      action>: StoreValue
+      display_name>: 変数に保存_雇用形態
+      key: C_koyoukeitai
+      value: "+convert_table_1"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # セルの値を取得（職種）
+    +get_cells_3:
+      action>: GetCells
+      display_name>: セルの値を取得（職種）
+      spreadsheet: "+get_spreadsheet_1"
+      range: 職種AW2.0!A1:J
+      findAll: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # テーブルデータ（二次元配列）を変換
+    +convert_table_3:
+      action>: ConvertTable
+      display_name>: テーブルデータ（二次元配列）を変換
+      header: false
+      table: "+get_cells_3"
+      transform:
+      - type: filter
+        column: '0'
+        operator: "=="
+        operand: "${shokushu}"
+        include_blank: false
+      - type: column
+        columns:
+          '1': '1'
+          '2': '2'
+          '3': '3'
+          '4': '4'
+          '5': '5'
+          '6': '6'
+          '7': '7'
+          '8': '8'
+          '9': '9'
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存(職種)
+    +store_value_4:
+      action>: StoreValue
+      display_name>: 変数に保存(職種)
+      key: C_shokushu
+      value: "+convert_table_3"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（求人）
+    +click_27:
+      action>: Click
+      display_name>: クリック（求人）
+      browser: "${browser}"
+      selector: //a[text()="求人"]
+      confirm: true
+      waitAfter: 3000
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（新規求人作成）
+    +click_28:
+      action>: Click
+      display_name>: クリック（新規求人作成）
+      browser: "${browser}"
+      selector: button[aria-label="新しい求人を作成する"]
+      confirm: true
+      waitAfter: 3000
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（雇用形態）
+    +click_29:
+      action>: Click
+      display_name>: クリック（雇用形態）
+      browser: "${browser}"
+      selector: //label/span[text()="${C_koyoukeitai[0][1]}"]
+      confirm: true
+      waitAfter: 3000
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（保存する）
+    +click_30:
+      action>: Click
+      display_name>: クリック（保存する）
+      browser: "${browser}"
+      selector: button[data-la="dialog_employment_status_save_btn_click"]
+      confirm: true
+      waitAfter: 3000
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（職種名）
+    +type_text_17:
+      action>: TypeText
+      display_name>: 文字入力（職種名）
+      browser: "${browser}"
+      selector: input[name="jobTitle"]
+      text: "${JobTitle}"
+      clearValue: true
+      waitAfter: 3000
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # テキストを作成
+    +text_3:
+      action>: Text
+      display_name>: テキストを作成
+      text: 1回目の職種登録
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（職種）
+    +inject_script_1:
+      action>: InjectScript
+      display_name>: クリック（職種）
+      browser: "${browser}"
+      code: |
+        // ページ内の全ての<a>タグを探し、"設定する"というテキストが含まれているものを見つける
+        const link = Array.from(document.querySelectorAll("a")).find(
+          el => el.textContent.trim() === "手動で設定する"
+        );
+        link.click();
+      waitAfter: 4000
+      returnValue: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（職種１）
+    +click_18:
+      action>: Click
+      display_name>: クリック（職種１）
+      browser: "${browser}"
+      selector: //div[@class="styles_name__zBGSl"]/div[text()="${C_shokushu[0][0]}"]
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（職種２）
+    +click_19:
+      action>: Click
+      display_name>: クリック（職種２）
+      browser: "+click_18"
+      selector: //div[@class="styles_name__zBGSl"]/div[text()="${C_shokushu[0][1]}"]
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（職種３）
+    +click_31:
+      action>: Click
+      display_name>: クリック（職種３）
+      browser: "${browser}"
+      selector: //span[@class="styles_container__uBTs2"]/label/span[text()="${C_shokushu[0][2]}"]
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（職種決定）
+    +click_20:
+      action>: Click
+      display_name>: クリック（職種決定）
+      browser: "${browser}"
+      selector: section[aria-label="操作"] button[data-la="dialog_job_setting_save_btn_click"]
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # テキストを作成
+    +text_4:
+      action>: Text
+      display_name>: テキストを作成
+      text: 2回目の職種登録
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 待機する
+    +wait_1:
+      action>: Wait
+      display_name>: 待機する
+      time: 3000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（職種）
+    +inject_script_2:
+      action>: InjectScript
+      display_name>: クリック（職種）
+      browser: "+click_20"
+      code: |
+        // ページ内の全ての<a>タグを探し、"設定する"というテキストが含まれているものを見つける
+        const link = Array.from(document.querySelectorAll("a")).find(
+          el => el.textContent.trim() === "手動で設定する"
+        );
+        link.click();
+      waitAfter: 4000
+      returnValue: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（職種１）
+    +click_4:
+      action>: Click
+      display_name>: クリック（職種１）
+      browser: "+inject_script_2"
+      selector: //div[@class="styles_name__zBGSl"]/div[text()="${C_shokushu[0][3]}"]
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+      timeout: 8000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（職種２）
+    +click_7:
+      action>: Click
+      display_name>: クリック（職種２）
+      browser: "+click_4"
+      selector: //div[@class="styles_name__zBGSl"]/div[text()="${C_shokushu[0][4]}"]
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+      timeout: 8000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（職種３）
+    +click_12:
+      action>: Click
+      display_name>: クリック（職種３）
+      browser: "+click_7"
+      selector: //span[@class="styles_container__uBTs2"]/label/span[text()="${C_shokushu[0][5]}"]
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+      timeout: 8000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（職種決定）
+    +click_13:
+      action>: Click
+      display_name>: クリック（職種決定）
+      browser: "+click_12"
+      selector: section[aria-label="操作"] button[data-la="dialog_job_setting_save_btn_click"]
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+      timeout: 8000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # テキストを作成
+    +text_6:
+      action>: Text
+      display_name>: テキストを作成
+      text: 3回目の職種登録
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 待機する
+    +wait_2:
+      action>: Wait
+      display_name>: 待機する
+      time: 3000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（職種）
+    +inject_script_3:
+      action>: InjectScript
+      display_name>: クリック（職種）
+      browser: "+click_13"
+      code: |
+        // ページ内の全ての<a>タグを探し、"設定する"というテキストが含まれているものを見つける
+        const link = Array.from(document.querySelectorAll("a")).find(
+          el => el.textContent.trim() === "手動で設定する"
+        );
+        link.click();
+      waitAfter: 4000
+      returnValue: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（職種１）
+    +click_35:
+      action>: Click
+      display_name>: クリック（職種１）
+      browser: "+inject_script_3"
+      selector: //div[@class="styles_name__zBGSl"]/div[text()="${C_shokushu[0][6]}"]
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+      timeout: 8000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（職種２）
+    +click_36:
+      action>: Click
+      display_name>: クリック（職種２）
+      browser: "+click_35"
+      selector: //div[@class="styles_name__zBGSl"]/div[text()="${C_shokushu[0][7]}"]
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+      timeout: 8000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（職種３）
+    +click_37:
+      action>: Click
+      display_name>: クリック（職種３）
+      browser: "+click_36"
+      selector: //span[@class="styles_container__uBTs2"]/label/span[text()="${C_shokushu[0][8]}"]
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+      timeout: 8000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（職種決定）
+    +click_38:
+      action>: Click
+      display_name>: クリック（職種決定）
+      browser: "+click_37"
+      selector: section[aria-label="操作"] button[data-la="dialog_job_setting_save_btn_click"]
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+      timeout: 8000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 検索して置換
+    +replace_text_9:
+      action>: ReplaceText
+      display_name>: 検索して置換
+      text: "${GyoumuShousai}"
+      find: "\\r\\n"
+      use_regex: true
+      replace_with: ${"\n"}
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存_\r\n置換処理
+    +store_value_9:
+      action>: StoreValue
+      display_name>: 変数に保存_\r\n置換処理
+      key: C_sigotonaiyou
+      value: "+replace_text_9"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # テキストを作成
+    +text_5:
+      action>: Text
+      display_name>: テキストを作成
+      text: |-
+        ${C_sigotonaiyou}
+        ${pr2}
+        ${pr3}
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 検索して置換
+    +replace_text_5:
+      action>: ReplaceText
+      display_name>: 検索して置換
+      text: "+text_5"
+      find: "<br>"
+      use_regex: true
+      replace_with: ${"\n"}
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（仕事内容）
+    +type_text_13:
+      action>: TypeText
+      display_name>: 文字入力（仕事内容）
+      browser: "${browser}"
+      selector: textarea[name="jobDescription"]
+      text: "+text_5"
+      clearValue: false
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 勤務地クリック
+    +click_3:
+      action>: Click
+      display_name>: 勤務地クリック
+      browser: "${browser}"
+      selector: a[data-la="joboffers_overviews_working_location_link_click"]
+      confirm: true
+      waitAfter: 3000
+      ignoreError: true
+      timeout: 10000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（勤務地名）
+    +type_text_2:
+      action>: TypeText
+      display_name>: 文字入力（勤務地名）
+      browser: "${browser}"
+      selector: input[aria-label="勤務地名"]
+      text: 株式会社UPP
+      clearValue: false
+      waitBefore: 2000
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 検索して置換
+    +replace_text_8:
+      action>: ReplaceText
+      display_name>: 検索して置換
+      text: "${address}"
+      find: "-"
+      use_regex: true
+      replace_with: ''
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（郵便番号）
+    +type_text_6:
+      action>: TypeText
+      display_name>: 文字入力（郵便番号）
+      browser: "${browser}"
+      selector: input[name="postcode"]
+      text: "+replace_text_8"
+      clearValue: false
+      waitAfter: 2000
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 都道府県を選ぶ
+    +select_option_1:
+      action>: SelectOption
+      display_name>: 都道府県を選ぶ
+      browser: "+type_text_6"
+      selector: select[name="prefectureJisCd"]
+      value: ''
+      text: "${todouhuken}"
+      confirm: true
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 市区郡を入力
+    +type_text_15:
+      action>: TypeText
+      display_name>: 市区郡を入力
+      browser: "+select_option_1"
+      selector: "#cityArea"
+      text: "${Sikuchouson}"
+      clearValue: false
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（丁目・番地・ビル名を省略する）
+    +click_32:
+      action>: Click
+      display_name>: クリック（丁目・番地・ビル名を省略する）
+      browser: "+type_text_15"
+      selector: //span[text()="丁目・番地・ビル名を省略する"]
+      confirm: true
+      waitAfter: 4000
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（アクセス）
+    +type_text_8:
+      action>: TypeText
+      display_name>: 文字入力（アクセス）
+      browser: "${browser}"
+      selector: input[aria-label="アクセス"]
+      text: "${access}付近"
+      clearValue: false
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック
+    +click_26:
+      action>: Click
+      display_name>: クリック
+      browser: "+type_text_8"
+      selector: ".styles_textarea__uXUYA"
+      confirm: true
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック
+    +click_5:
+      action>: Click
+      display_name>: クリック
+      browser: "+type_text_8"
+      selector: ".styles_floating__O9V0p button:nth-of-type(2)"
+      confirm: true
+      waitAfter: 2000
+      ignoreError: false
+      timeout: 3000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # スクリーンショットを撮る
+    +take_screenshot_4:
+      action>: TakeScreenshot
+      display_name>: スクリーンショットを撮る
+      browser: "+click_5"
+      full_page: true
+      type: png
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 要素を見つける
+    +find_element_1:
+      action>: FindElement
+      display_name>: 要素を見つける
+      browser: "${browser}"
+      find_by: selector
+      value: div[aria-label="error_undefined"]
+      timeout: 4000
+      visible: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 真のとき（住所の自動入力に失敗）
+    +if_2:
+      if>:
+        display_name>: 真のとき（住所の自動入力に失敗）
+        condition: "+find_element_1"
+        private: false
+      meta:
+        action:
+          disabled: false
+      _do:
+
+        # クリック（キャンセル）
+        +click_22:
+          action>: Click
+          display_name>: クリック（キャンセル）
+          browser: "${browser}"
+          selector: button[data-la="working_locations_dialog_cancel_btn_click"]
+          confirm: true
+          waitAfter: 3000
+          ignoreError: true
+          timeout: 30000
+          private: false
+          meta:
+            action:
+              disabled: false
+
+    # テキストを作成
+    +text_7:
+      action>: Text
+      display_name>: テキストを作成
+      text: 登録した勤務地を選択するフロー
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 勤務地をクリック
+    +click_39:
+      action>: Click
+      display_name>: 勤務地をクリック
+      browser: "${browser}"
+      selector: ".styles_wrapHeader__HMk69"
+      confirm: true
+      waitBefore: 2000
+      waitAfter: 2000
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # スクリーンショットを撮る
+    +take_screenshot_6:
+      action>: TakeScreenshot
+      display_name>: スクリーンショットを撮る
+      browser: "+click_39"
+      full_page: false
+      type: png
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # valueがMAXの値を返す
+    +inject_script_4:
+      action>: InjectScript
+      display_name>: valueがMAXの値を返す
+      browser: "+click_39"
+      code: |
+        function clickMaxLocationOption() {
+          const options = Array.from(
+            document.querySelectorAll('div[role="option"][data-name="dropdown-option"]')
+          );
+
+          if (!options.length) {
+            return "No dropdown options found.";
+          }
+
+          const maxOption = options[options.length - 1];
+          maxOption.click();
+
+          return "Option clicked: " + maxOption.innerText.trim();
+        }
+
+        clickMaxLocationOption();
+      waitBefore: 2000
+      waitAfter: 2000
+      returnValue: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存
+    +store_value_20:
+      action>: StoreValue
+      display_name>: 変数に保存
+      key: selectBox_value
+      value: "+inject_script_4"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 登録した勤務地を選択
+    +select_option_4:
+      action>: SelectOption
+      display_name>: 登録した勤務地を選択
+      browser: "+click_39"
+      selector: select[name="dropdown-selected"]
+      value: "${selectBox_value}"
+      text: ''
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 勤務地登録の確認
+    +take_screenshot_5:
+      action>: TakeScreenshot
+      display_name>: 勤務地登録の確認
+      browser: "+select_option_4"
+      full_page: true
+      type: png
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（喫煙所）
+    +click_17:
+      action>: Click
+      display_name>: クリック（喫煙所）
+      browser: "${browser}"
+      selector: //span[text()="${Kituenjo}"]
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 検索して置換
+    +replace_text_6:
+      action>: ReplaceText
+      display_name>: 検索して置換
+      text: "${ShokubanoFuniki}"
+      find: "<br>"
+      use_regex: true
+      replace_with: ' ${"\n"}'
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（職場の雰囲気）
+    +type_text_14:
+      action>: TypeText
+      display_name>: 文字入力（職場の雰囲気）
+      browser: "${browser}"
+      selector: textarea[aria-label="職場環境"]
+      text: "+replace_text_6"
+      clearValue: false
+      waitAfter: 2000
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # テキストを作成（応募資格）求める人材
+    +text_1:
+      action>: Text
+      display_name>: テキストを作成（応募資格）求める人材
+      text: |-
+        ＜必須スキル＞
+        ${Skill_Must}
+
+        ＜歓迎条件＞
+        ${KangeiJouken}
+
+        ＜求める人材像＞
+        ${Statue}
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 検索して置換
+    +replace_text_7:
+      action>: ReplaceText
+      display_name>: 検索して置換
+      text: "+text_1"
+      find: "<br>"
+      use_regex: true
+      replace_with: ${"\n"}
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（応募資格）
+    +type_text_9:
+      action>: TypeText
+      display_name>: 文字入力（応募資格）
+      browser: "${browser}"
+      selector: textarea[name="personal"]
+      text: "+replace_text_7"
+      clearValue: false
+      waitAfter: 2000
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # デフォルトのGドライブに保存されている画像ID
+    +store_value_19:
+      action>: StoreValue
+      display_name>: デフォルトのGドライブに保存されている画像ID
+      key: id
+      value: 13J-OYH1NXu6UceOIW1sY36KPWgFgeuME
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # Salesforceに画像が登録されている
+    +if_7:
+      if>:
+        display_name>: Salesforceに画像が登録されている
+        condition: ${EyeCatchUrl__imag != ""}
+        private: false
+      meta:
+        action:
+          disabled: false
+      _do:
+
+        # GドライブのURLを取得
+        +salesforce_query_1:
+          action>: SalesforceQuery
+          display_name>: GドライブのURLを取得
+          provider: sfdc_5d1544566cbf9f61b0d2
+          query: SELECT GoogleDriveFileURL__c FROM GoogleDrive_PublicFile__c WHERE
+            id = '${EyeCatchUrl__imag}'
+          private: false
+          meta:
+            display:
+              provider:
+                type: chip
+                label: Salesforce (y_itasaka@upthemark.com)
+                icon: salesforce
+            action:
+              disabled: false
+
+        # 変数に保存
+        +store_value_17:
+          action>: StoreValue
+          display_name>: 変数に保存
+          key: drive_url
+          value: "+salesforce_query_1"
+          setIfNotDefined: false
+          private: false
+          meta:
+            action:
+              disabled: false
+
+        # GドライブのID部分を抽出
+        +run_script_12:
+          action>: RunScript
+          display_name>: GドライブのID部分を抽出
+          code: |
+            let url = drive_url[0].GoogleDriveFileURL__c;
+            let id = url.match(/\/d\/(.*?)\//)[1];
+
+            return id;
+          private: false
+          meta:
+            action:
+              disabled: false
+
+        # 変数に保存
+        +store_value_18:
+          action>: StoreValue
+          display_name>: 変数に保存
+          key: id
+          value: "+run_script_12"
+          setIfNotDefined: false
+          private: false
+          meta:
+            action:
+              disabled: false
+
+    # ファイルを取得
+    +get_file_1:
+      action>: GetFile
+      display_name>: ファイルを取得
+      provider: gdrive_4bb1b2ec0bed48bc8c31
+      filename: "${id}"
+      private: false
+      meta:
+        display:
+          provider:
+            type: chip
+            label: Google Drive (y_itasaka@upthemark.com)
+            icon: googledrive
+        action:
+          disabled: false
+
+    # フォームでファイルを送信
+    +set_file_to_upload_1:
+      action>: SetFileToUpload
+      display_name>: フォームでファイルを送信
+      browser: "+type_text_9"
+      selector: ".styles_input__sPBpl"
+      file: "+get_file_1"
+      waitBefore: 3000
+      waitAfter: 3000
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（求人キャッチコピー）
+    +type_text_7:
+      action>: TypeText
+      display_name>: 文字入力（求人キャッチコピー）
+      browser: "${browser}"
+      selector: textarea[aria-label="求人キャッチコピー"]
+      text: "${pr1} "
+      clearValue: false
+      waitAfter: 3000
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（採用人数）
+    +type_text_16:
+      action>: TypeText
+      display_name>: 文字入力（採用人数）
+      browser: "${browser}"
+      selector: input[name="hiresNumber"]
+      text: "${saiyousuu}"
+      clearValue: false
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック
+    +click_24:
+      action>: Click
+      display_name>: クリック
+      browser: "+type_text_16"
+      selector: button:nth-of-type(3)
+      confirm: true
+      waitAfter: 5000
+      ignoreError: false
+      timeout: 5000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（給与形態）
+    +click_23:
+      action>: Click
+      display_name>: クリック（給与形態）
+      browser: "+click_24"
+      selector: input[aria-label="${SalaryType}"]
+      confirm: true
+      waitAfter: 4000
+      ignoreError: true
+      timeout: 30000
+      highResolution: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # スクリーンショットを撮る
+    +take_screenshot_3:
+      action>: TakeScreenshot
+      display_name>: スクリーンショットを撮る
+      browser: "+click_23"
+      full_page: false
+      type: png
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（時給最低額）
+    +type_text_3:
+      action>: TypeText
+      display_name>: 文字入力（時給最低額）
+      browser: "${browser}"
+      selector: input[name="salaryAmountSection.minimumSalary"]
+      text: "${Salary1}"
+      clearValue: false
+      waitAfter: 2000
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（時給最高額）
+    +type_text_20:
+      action>: TypeText
+      display_name>: 文字入力（時給最高額）
+      browser: "+type_text_3"
+      selector: input[name="salaryAmountSection.maximumSalary"]
+      text: "${Salary2}"
+      clearValue: false
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 検索して置換（給与備考改行）
+    +replace_text_2:
+      action>: ReplaceText
+      display_name>: 検索して置換（給与備考改行）
+      text: "${BU_Salary}"
+      find: "<br>"
+      use_regex: true
+      replace_with: ${"\n"}
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（給与備考）
+    +type_text_10:
+      action>: TypeText
+      display_name>: 文字入力（給与備考）
+      browser: "${browser}"
+      selector: textarea[name="salarySupplementSection.salarySupplement"]
+      text: "+replace_text_2"
+      clearValue: false
+      waitAfter: 5000
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 要素を見つける
+    +find_element_2:
+      action>: FindElement
+      display_name>: 要素を見つける
+      browser: "${browser}"
+      find_by: selector
+      value: select[name="workingHoursSection.workingHoursDisplayMethod"]
+      timeout: 5000
+      visible: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 真のとき（1ヶ月の合計勤務時間）
+    +if_3:
+      if>:
+        display_name>: 真のとき（1ヶ月の合計勤務時間）
+        condition: "+find_element_2"
+        private: false
+      meta:
+        action:
+          disabled: false
+      _do:
+
+        # 選択肢を選ぶ（勤務時間の記載方法）
+        +select_option_2:
+          action>: SelectOption
+          display_name>: 選択肢を選ぶ（勤務時間の記載方法）
+          browser: "${browser}"
+          selector: select[name="workingHoursSection.workingHoursDisplayMethod"]
+          value: '01'
+          text: ''
+          confirm: true
+          waitAfter: 2000
+          ignoreError: true
+          private: false
+          meta:
+            action:
+              disabled: false
+
+        # 文字入力
+        +type_text_23:
+          action>: TypeText
+          display_name>: 文字入力
+          browser: "+select_option_2"
+          selector: input[name="workingHoursSection.totalWorkingHoursTime"]
+          text: 1
+          clearValue: false
+          ignoreError: true
+          private: false
+          meta:
+            action:
+              disabled: false
+
+        # 選択肢を選ぶ
+        +select_option_3:
+          action>: SelectOption
+          display_name>: 選択肢を選ぶ
+          browser: "+type_text_23"
+          selector: select[name="workingHoursSection.totalWorkingHoursUnit"]
+          value: '02'
+          text: ''
+          confirm: true
+          waitAfter: 2000
+          ignoreError: true
+          private: false
+          meta:
+            action:
+              disabled: false
+
+        # 文字入力（1ヶ月の合計勤務時間）
+        +type_text_24:
+          action>: TypeText
+          display_name>: 文字入力（1ヶ月の合計勤務時間）
+          browser: "+select_option_3"
+          selector: input[name="workingHoursSection.totalWorkingHoursHour"]
+          text: "${x_SouroudouZikan}"
+          clearValue: false
+          ignoreError: true
+          private: false
+          meta:
+            action:
+              disabled: false
+
+        # 文字入力
+        +type_text_25:
+          action>: TypeText
+          display_name>: 文字入力
+          browser: "+type_text_24"
+          selector: input[name="workingHoursSection.totalWorkingHoursMinute"]
+          text: '0'
+          clearValue: false
+          ignoreError: true
+          private: false
+          meta:
+            action:
+              disabled: false
+
+    # クリック（勤務形態）
+    +click_9:
+      action>: Click
+      display_name>: クリック（勤務形態）
+      browser: "${browser}"
+      selector: input[aria-label="${KinmuKeitai}"]
+      confirm: true
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 検索して置換（<br>を改行に置き換える）勤務時間
+    +replace_text_1:
+      action>: ReplaceText
+      display_name>: 検索して置換（<br>を改行に置き換える）勤務時間
+      text: "${kinmuzikan_ichiran}"
+      find: "<br>"
+      use_regex: true
+      replace_with: ${"\n"}
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（勤務時間）
+    +type_text_5:
+      action>: TypeText
+      display_name>: 文字入力（勤務時間）
+      browser: "${browser}"
+      selector: textarea[name="workingTimeSupplementSection.workingTimeSupplement"]
+      text: "+replace_text_1"
+      clearValue: false
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 検索して置換（休日備考）
+    +replace_text_3:
+      action>: ReplaceText
+      display_name>: 検索して置換（休日備考）
+      text: "${kinmu_ichiran}"
+      find: "<br>"
+      use_regex: true
+      replace_with: ${"\n"}
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（休日備考）
+    +type_text_11:
+      action>: TypeText
+      display_name>: 文字入力（休日備考）
+      browser: "+click_9"
+      selector: textarea[name="holidaySection.holiday"]
+      text: "+replace_text_3"
+      clearValue: false
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 各要素について繰り返す
+    +for_each_1:
+      for_each>:
+        ShakaihokenList: "${Shakaihoken}"
+        private: false
+        display_name>: 各要素について繰り返す
+      meta:
+        action:
+          disabled: false
+      _do:
+
+        # クリック（社会保険）
+        +click_11:
+          action>: Click
+          display_name>: クリック（社会保険）
+          browser: "+type_text_11"
+          selector: //span[text()="${ShakaihokenList}"]
+          confirm: true
+          waitAfter: 2000
+          ignoreError: true
+          timeout: 30000
+          private: false
+          meta:
+            action:
+              disabled: false
+
+    # 検索して置換（福利厚生）
+    +replace_text_4:
+      action>: ReplaceText
+      display_name>: 検索して置換（福利厚生）
+      text: "${fukuri_ichiran}"
+      find: "<br>"
+      use_regex: true
+      replace_with: ${"\n"}
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（福利厚生）
+    +type_text_12:
+      action>: TypeText
+      display_name>: 文字入力（福利厚生）
+      browser: "${browser}"
+      selector: textarea[name="welfareSection.welfare"]
+      text: "+replace_text_4"
+      clearValue: false
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（試用・研修期間の有無）
+    +click_33:
+      action>: Click
+      display_name>: クリック（試用・研修期間の有無）
+      browser: "${browser}"
+      selector: fieldset[name="probationaryPeriodSection.isProbationaryPeriod"] input[aria-label="なし"]
+      confirm: true
+      waitAfter: 3000
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（保存して次へ）
+    +click_34:
+      action>: Click
+      display_name>: クリック（保存して次へ）
+      browser: "+click_33"
+      selector: //button[text()="保存して次へ"]
+      confirm: true
+      waitAfter: 5000
+      ignoreError: false
+      timeout: 5000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # テキストを作成
+    +text_2:
+      action>: Text
+      display_name>: テキストを作成
+      text: |-
+        ＜選考の流れ＞
+        エントリー >> 面談 >> 見学 >> 採用
+        まずはお電話でご連絡いたします。
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（選考の流れ）
+    +type_text_4:
+      action>: TypeText
+      display_name>: 文字入力（選考の流れ）
+      browser: "+click_34"
+      selector: textarea[name="selectionFlow"]
+      text: "+text_2"
+      clearValue: false
+      waitAfter: 3000
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（問い合わせ先メールアドレス）
+    +type_text_19:
+      action>: TypeText
+      display_name>: 文字入力（問い合わせ先メールアドレス）
+      browser: "+type_text_4"
+      selector: input[name="contactEmail"]
+      text: "${contactinfo.email}"
+      clearValue: false
+      waitAfter: 3000
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 文字入力（問い合わせ先電話番号）
+    +type_text_26:
+      action>: TypeText
+      display_name>: 文字入力（問い合わせ先電話番号）
+      browser: "+type_text_19"
+      selector: input[name="contactPhone"]
+      text: "${contactinfo.phone}"
+      clearValue: false
+      ignoreError: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（保存して次へ）
+    +click_10:
+      action>: Click
+      display_name>: クリック（保存して次へ）
+      browser: "${browser}"
+      selector: //button[text()="保存して次へ"]
+      confirm: true
+      waitAfter: 5000
+      ignoreError: false
+      timeout: 5000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # URLを取得
+    +get_u_r_l_1:
+      action>: GetURL
+      display_name>: URLを取得
+      browser: "+open_browser_1"
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（求人作成完了）
+    +click_8:
+      action>: Click
+      display_name>: クリック（求人作成完了）
+      browser: "${browser}"
+      selector: ".styles_buttonPost___Iks3"
+      confirm: true
+      waitAfter: 4000
+      ignoreError: false
+      timeout: 5000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック
+    +click_6:
+      action>: Click
+      display_name>: クリック
+      browser: "+click_8"
+      selector: ".styles_container__CqOlK button:nth-of-type(2)"
+      confirm: true
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 正規表現で検索
+    +match_text_1:
+      action>: MatchText
+      display_name>: 正規表現で検索
+      text: "+get_u_r_l_1"
+      regex: "(?<=keywords\\/).*(?=\\/edit)"
+      global: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存（求人番号）
+    +store_value_7:
+      action>: StoreValue
+      display_name>: 変数に保存（求人番号）
+      key: URL
+      value: "+match_text_1"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # レコードを更新する
+    +salesforce_update_record_1:
+      action>: SalesforceUpdateRecord
+      display_name>: レコードを更新する
+      provider: sfdc_5d1544566cbf9f61b0d2
+      object: JobOffer__c
+      id: "${ID}"
+      data: '{"AirWORK_URL__c":"https://ats.rct.airwork.net/job_offers/overviews/${URL[0]}/edit"}
+
+        '
+      private: false
+      meta:
+        display:
+          provider:
+            type: chip
+            label: Salesforce (y_itasaka@upthemark.com)
+            icon: salesforce
+          object:
+            label: 3. 求人
+            icon: salesforce
+            type: chip
+        action:
+          disabled: false
+
+    # スクリーンショットを撮る
+    +take_screenshot_1:
+      action>: TakeScreenshot
+      display_name>: スクリーンショットを撮る
+      browser: "+click_8"
+      full_page: true
+      type: png
+      private: false
+      meta:
+        action:
+          disabled: false
+
+# 真のとき（status01が掲載停止）
++if_4:
+  if>:
+    display_name>: 真のとき（status01が掲載停止）
+    condition: ${status01==="掲載停止"}
+    private: false
+  meta:
+    action:
+      disabled: false
+  _do:
+
+    # 正規表現で検索
+    +match_text_2:
+      action>: MatchText
+      display_name>: 正規表現で検索
+      text: "${AirWORK_URL}"
+      regex: "(?<=overviews\\/).*(?=\\/edit)"
+      global: true
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # 変数に保存（求人番号）
+    +store_value_8:
+      action>: StoreValue
+      display_name>: 変数に保存（求人番号）
+      key: jobId
+      value: "+match_text_2"
+      setIfNotDefined: false
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # URLへ遷移
+    +go_to_2:
+      action>: GoTo
+      display_name>: URLへ遷移
+      browser: "+open_browser_1"
+      url: https://ats.rct.airwork.net/job_offers?currentPage=1&detailFilter=&publishStatus=&searchWord=${jobId[0]}
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（求人選択）
+    +click_14:
+      action>: Click
+      display_name>: クリック（求人選択）
+      browser: "+go_to_2"
+      selector: input[data-la="joboffers_checkbox_all_off_click"]
+      confirm: true
+      waitAfter: 3000
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（未掲載にする）
+    +click_15:
+      action>: Click
+      display_name>: クリック（未掲載にする）
+      browser: "+click_14"
+      selector: button[data-la="joboffers_end_publish_btn_click"]
+      confirm: true
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # クリック（求人の掲載を終了）
+    +click_21:
+      action>: Click
+      display_name>: クリック（求人の掲載を終了）
+      browser: "+click_15"
+      selector: button[data-la="alert_dialog_close_post_job_ok_btn_click"]
+      confirm: true
+      waitBefore: 1000
+      ignoreError: true
+      timeout: 30000
+      private: false
+      meta:
+        action:
+          disabled: false
+
+    # スクリーンショットを撮る
+    +take_screenshot_2:
+      action>: TakeScreenshot
+      display_name>: スクリーンショットを撮る
+      browser: "+click_21"
+      full_page: false
+      type: png
+      private: false
+      meta:
+        action:
+          disabled: false

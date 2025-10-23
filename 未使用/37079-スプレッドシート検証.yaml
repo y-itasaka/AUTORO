@@ -1,0 +1,58 @@
+# 既存のスプレッドシートを取得
++get_spreadsheet_1:
+  action>: GetSpreadsheet
+  provider: gsheet_03b0cec6f34fd40f463b
+  spreadsheet_id: 1WzRgB4u9xI5KA_JwnYHRoe95mVlPavVJ9ThSjnCqId0
+  meta:
+    display:
+      provider:
+        type: chip
+        label: 'Google Spreadsheet (y_itasaka@upthemark.com)'
+        icon: googlespreadsheet
+      spreadsheet_id:
+        label: 'タイムシート'
+        icon: text
+        type: chip
+
+# セルの値を取得
++get_cells_1:
+  action>: GetCells
+  spreadsheet: +get_spreadsheet_1
+  range: 'シート1!A3:B6'
+
+# CSVを作成
++write_c_s_v_1:
+  action>: WriteCSV
+  filename: A
+  table: +get_cells_1
+  bom: true
+
+# ファイルを保存
++save_file_1:
+  action>: SaveFile
+  filename: +write_c_s_v_1
+  provider: gdrive_4bb1b2ec0bed48bc8c31
+  directory: '1uHEbw3-xXOg7yBcasNy7P2wzgjHnx0JU'
+  createPath: false
+  meta:
+    display:
+      provider:
+        type: chip
+        label: 'Google Drive (y_itasaka@upthemark.com)'
+        icon: googledrive
+
+# Gmailを送信する
++gmail_send_1:
+  action>: GmailSend
+  provider: gsmail_9f26688d5bb5f79fd8e9
+  to: 'yuya.itasaka@gmail.com'
+  subject: '件名'
+  body: '本文'
+  attachments: +write_c_s_v_1
+  from: ''
+  meta:
+    display:
+      provider:
+        type: chip
+        label: 'Gmail for Google Workspace (y_itasaka@upthemark.com)'
+        icon: gsmail

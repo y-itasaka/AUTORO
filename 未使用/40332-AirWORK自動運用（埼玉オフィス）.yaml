@@ -1,0 +1,729 @@
+# ブラウザを開く
++open_browser_1:
+  action>: OpenBrowser
+  url: https://airregi.jp/work/recruitment/
+  lang: ja-JP
+  headless: true
+  windowSize: 1920 x 1080
+
+# クリック（ログイン画面へ）
++click_2:
+  action>: Click
+  browser: "+open_browser_1"
+  selector: ".header__btnLogin"
+  confirm: true
+  ignoreError: true
+
+# 文字入力（ID）
++type_text_1:
+  action>: TypeText
+  browser: "+open_browser_1"
+  selector: ":nth-child(1) > .login_form_content > .form_msg_wrap > .input_general"
+  text: jobs@saitama.upthemark.com
+  clearValue: false
+  ignoreError: true
+
+# パスワード入力
++type_password_1:
+  action>: TypePassword
+  browser: "+type_text_1"
+  selector: ":nth-child(2) > .login_form_content > .form_msg_wrap > .input_general"
+  password: "********"
+  ignoreError: true
+
+# クリック（ログイン）
++click_1:
+  action>: Click
+  browser: "+type_password_1"
+  selector: "#submit_btn"
+  confirm: true
+  waitAfter: 5000
+  ignoreError: true
+
+# 真のとき
++if_1:
+  if>: ${status01==="掲載開始"}
+  _do:
+
+    # URLへ遷移（求人新規作成へ）
+    +go_to_1:
+      action>: GoTo
+      browser: "+click_1"
+      url: https://ats.joboplite.jp/job_offers/new/
+
+    # 勤務地クリック
+    +click_3:
+      action>: Click
+      browser: "+go_to_1"
+      selector: "#open_store_modal"
+      confirm: true
+      ignoreError: true
+
+    # クリック１１（その他の勤務地追加）
+    +click_4:
+      action>: Click
+      browser: "+click_3"
+      selector: ".modalContent_addBtn_text"
+      confirm: true
+      ignoreError: true
+
+    # 文字入力
+    +type_text_2:
+      action>: TypeText
+      browser: "+click_4"
+      selector: "#storeName"
+      text: "${kyoten}"
+      clearValue: false
+      ignoreError: true
+
+    # 検索して置換
+    +replace_text_8:
+      action>: ReplaceText
+      text: "${address}"
+      find: "-"
+      use_regex: true
+      replace_with: ''
+
+    # 文字入力（郵便番号）
+    +type_text_6:
+      action>: TypeText
+      browser: "+click_4"
+      selector: "#address"
+      text: "+replace_text_8"
+      clearValue: false
+      ignoreError: true
+
+    # 文字入力（勤務地域）
+    +type_text_7:
+      action>: TypeText
+      browser: "+type_text_6"
+      selector: "#address2"
+      text: "${kinmuti}"
+      clearValue: false
+      ignoreError: true
+
+    # 文字入力（アクセス）
+    +type_text_8:
+      action>: TypeText
+      browser: "+type_text_7"
+      selector: "#access"
+      text: "${access}付近"
+      clearValue: false
+      ignoreError: true
+
+    # クリック（保存）
+    +click_5:
+      action>: Click
+      browser: "+type_text_8"
+      selector: "#store_edit_modal_submit_btn"
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+
+    # クリック（勤務地選択）
+    +click_6:
+      action>: Click
+      browser: "+click_5"
+      selector: "#store_list > li:first-child"
+      confirm: true
+      waitBefore: 2000
+      ignoreError: true
+
+    # クリック（この勤務地を選択する）
+    +click_7:
+      action>: Click
+      browser: "+click_6"
+      selector: "#confirm_store_modal"
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+
+    # 既存のスプレッドシートを取得（突合表）
+    +get_spreadsheet_1:
+      action>: GetSpreadsheet
+      provider: gsheet_03b0cec6f34fd40f463b
+      spreadsheet_id: 1zX8ofS9f05yIxe_RomTvqa8Isa1FfHKBPI8ZEUqh6xY
+      meta:
+        display:
+          provider:
+            type: chip
+            label: Google Spreadsheet (y_itasaka@upthemark.com)
+            icon: googlespreadsheet
+          spreadsheet_id:
+            label: 突合表（robotic)
+            icon: text
+            type: chip
+
+    # セルの値を取得（雇用形態）
+    +get_cells_1:
+      action>: GetCells
+      spreadsheet: "+get_spreadsheet_1"
+      range: 雇用形態!A2:B15
+
+    # テーブルデータ（二次元配列）を変換
+    +convert_table_1:
+      action>: ConvertTable
+      header: false
+      table: "+get_cells_1"
+      transform:
+      - type: filter
+        column: '0'
+        operator: "=="
+        operand: "${koyoukeitai}"
+        include_blank: false
+      - type: column
+        columns:
+          '0': '0'
+          '1': '1'
+
+    # 変数に保存
+    +store_value_1:
+      action>: StoreValue
+      key: C_koyoukeitai
+      value: "+convert_table_1"
+
+    # ページ内でJavaScriptを実行する
+    +inject_script_1:
+      action>: InjectScript
+      browser: "+click_7"
+      code: |
+        function radioClick(word) {
+          const el = document.querySelectorAll('input[name="employment_type"]');
+          const target = Array.from(el).filter(x => {
+            const text = x.parentNode.querySelector(".form_radio_body--long-height")
+              .innerText;
+            return text === word;
+          });
+          if (!target.length == 0) {
+            target[0].click();
+          }
+        }
+        radioClick("${C_koyoukeitai[0][1]}");
+      returnValue: false
+
+    # セルの値を取得（職種）
+    +get_cells_3:
+      action>: GetCells
+      spreadsheet: "+get_spreadsheet_1"
+      range: 職種!A2:D250
+
+    # テーブルデータ（二次元配列）を変換
+    +convert_table_3:
+      action>: ConvertTable
+      header: false
+      table: "+get_cells_3"
+      transform:
+      - type: filter
+        column: '0'
+        operator: "=="
+        operand: "${shokushu}"
+        include_blank: false
+      - type: column
+        columns:
+          '0': '0'
+          '1': '1'
+          '2': '2'
+
+    # 変数に保存
+    +store_value_4:
+      action>: StoreValue
+      key: C_shokushu
+      value: "+convert_table_3"
+
+    # 選択肢を選ぶ（職種１）
+    +select_option_2:
+      action>: SelectOption
+      browser: "+inject_script_1"
+      selector: ".form_select--size_4"
+      value: ''
+      text: "${C_shokushu[0][1]}"
+      confirm: true
+      waitAfter: 5000
+      ignoreError: true
+
+    # 職種２のSelectをスクレイピング（入力内容からセレクタを指定するため）
+    +scrape_page_1:
+      action>: ScrapePage
+      browser: "+select_option_2"
+      selector: ".job_category_medium"
+      text_only: false
+      ignoreError: true
+
+    # JSONを配列に変換
+    +convert_j_s_o_n_to_array_1:
+      action>: ConvertJSONToArray
+      json: "+scrape_page_1"
+      header:
+      - selector
+      - innerText
+      unwind: []
+      stringify: []
+
+    # 変数に保存
+    +store_value_2:
+      action>: StoreValue
+      key: scrapedData
+      value: "+convert_j_s_o_n_to_array_1"
+
+    # 職種２のセレクタを特定
+    +run_script_1:
+      action>: RunScript
+      code: |
+        scrapedData.shift();
+        let data = scrapedData.map(e => {
+          let array = e[1].split(/\r?\n/g);
+          let removeBlankArray = array.map(e => {
+            return e.replace(/\s+/g, "");
+          });
+          return [e[0], removeBlankArray];
+        });
+
+        let formattedData = data.map(e => {
+          let ee = e[1].filter(f => {
+            return f.length;
+          });
+          return [e[0], ee];
+        });
+        let selectedData = formattedData.filter(e => {
+          return e[1].includes(C_shokushu[0][2]);
+        });
+
+        return selectedData[0][0];
+
+    # 選択肢を選ぶ（職種２）
+    +select_option_3:
+      action>: SelectOption
+      browser: "+select_option_2"
+      selector: "+run_script_1"
+      value: ''
+      text: "${C_shokushu[0][2]}"
+      confirm: true
+      ignoreError: true
+
+    # ページ内でJavaScriptを実行する
+    +inject_script_3:
+      action>: InjectScript
+      browser: "+select_option_3"
+      code: |
+        function radioClick(word) {
+          const el = document.querySelectorAll('input[name="job_category_view_flg"]');
+          const target = Array.from(el).filter(x => {
+            const text = x.parentNode.querySelector(".form_radio_body").innerText;
+            return text === word;
+          });
+          if (!target.length == 0) {
+            target[0].click();
+          }
+        }
+        radioClick("「雇用形態」「職種」は表示せず「職種名（自由入力）」のみ表示する");
+      returnValue: false
+
+    # テキストを作成（求人タイトル）
+    +text_4:
+      action>: Text
+      text: "${title}（${No}）"
+
+    # 文字入力（求人タイトル）
+    +type_text_4:
+      action>: TypeText
+      browser: "+select_option_3"
+      selector: ".cell--inline > .form_msg_wrap > .form_textarea-big"
+      text: "+text_4"
+      clearValue: false
+      ignoreError: true
+
+    # ページ内でJavaScriptを実行する（給与形態）
+    +inject_script_2:
+      action>: InjectScript
+      browser: "+type_text_4"
+      code: |
+        function radioClick(word) {
+          const el = document.querySelectorAll('input[name="salary_form"]');
+          const target = Array.from(el).filter(x => {
+            const text = x.parentNode.querySelector(".form_radio_body--long-height")
+              .innerText;
+            return text === word;
+          });
+          if (!target.length == 0) {
+            target[0].click();
+          }
+        }
+        radioClick("${SalaryType}");
+      returnValue: false
+
+    # クリック（金額表示方法）
+    +click_11:
+      action>: Click
+      browser: "+inject_script_2"
+      selector: "#wrap-salary_input_pattern > .form_radio > :nth-child(2) > .form_radio_body--long-height"
+      confirm: true
+      ignoreError: true
+
+    # 文字入力（時給ベース）
+    +type_text_3:
+      action>: TypeText
+      browser: "+click_11"
+      selector: "#wrap-salary_amount_min > .form_msg_wrap > .input_general"
+      text: "${Salary2}"
+      clearValue: false
+      ignoreError: true
+
+    # テキストを作成（給与備考）
+    +text_3:
+      action>: Text
+      text: |
+        ${SalaryType} ${Salary1}円 〜 ${Salary2}円
+        ${BU_Salary}
+
+    # 検索して置換（給与備考改行）
+    +replace_text_2:
+      action>: ReplaceText
+      text: "+text_3"
+      find: "<br>"
+      use_regex: true
+      replace_with: ${"\n"}
+
+    # 文字入力（給与備考）
+    +type_text_10:
+      action>: TypeText
+      browser: "+type_text_3"
+      selector: ":nth-child(7) > .form_msg_wrap > .form_textarea-big"
+      text: "+replace_text_2"
+      clearValue: false
+      ignoreError: true
+
+    # ページ内でJavaScriptを実行する（研修自由記入）
+    +inject_script_5:
+      action>: InjectScript
+      browser: "+type_text_10"
+      code: |
+        function radioClick(word) {
+          const el = document.querySelectorAll('input[name="trial"]');
+          const target = Array.from(el).filter(x => {
+            const text = x.parentNode.querySelector(".form_radio_body").innerText;
+            return text === word;
+          });
+          if (!target.length == 0) {
+            target[0].click();
+          }
+        }
+        radioClick("本文中に記載");
+      returnValue: false
+
+    # テキストを作成（応募資格）
+    +text_1:
+      action>: Text
+      text: |-
+        ＜求める人物像＞
+        ${Statue}
+
+        ＜歓迎スキル＞
+        ${Skill_Must}
+
+        ＜必須スキル＞
+        ${Skill_Kangei}
+
+    # 文字入力（応募資格）
+    +type_text_9:
+      action>: TypeText
+      browser: "+inject_script_5"
+      selector: ".mb10 > .form_msg_wrap > .form_textarea-big"
+      text: "+text_1"
+      clearValue: false
+      ignoreError: true
+
+    # 検索して置換（<br>を改行に置き換える）勤務時間
+    +replace_text_1:
+      action>: ReplaceText
+      text: "${kinmuzikan_ichiran}"
+      find: "<br>"
+      use_regex: true
+      replace_with: ${"\n"}
+
+    # 文字入力（勤務時間）
+    +type_text_5:
+      action>: TypeText
+      browser: "+inject_script_5"
+      selector: ".table_lastChild > td > .row > .form_msg_wrap > .form_textarea-big"
+      text: "+replace_text_1"
+      clearValue: false
+      ignoreError: true
+
+    # クリック（さらに詳しく募集要項を入力する）
+    +click_9:
+      action>: Click
+      browser: "+type_text_5"
+      selector: "#contents_offer_description > .table_toggleBtnArea > .table_toggleBtnArea_btn--openBtn"
+      confirm: true
+      ignoreError: true
+
+    # 検索して置換（休日備考）
+    +replace_text_3:
+      action>: ReplaceText
+      text: "${kinmu_ichiran}"
+      find: "<br>"
+      use_regex: true
+      replace_with: ${"\n"}
+
+    # 文字入力（休日備考）
+    +type_text_11:
+      action>: TypeText
+      browser: "+click_9"
+      selector: ":nth-child(11) > td.cell--inline > .row > .form_msg_wrap > .form_textarea-big"
+      text: "+replace_text_3"
+      clearValue: false
+      ignoreError: true
+
+    # 検索して置換（福利厚生）
+    +replace_text_4:
+      action>: ReplaceText
+      text: "${fukuri_ichiran}"
+      find: "<br>"
+      use_regex: true
+      replace_with: ${"\n"}
+
+    # 文字入力（福利厚生）
+    +type_text_12:
+      action>: TypeText
+      browser: "+type_text_11"
+      selector: ":nth-child(12) > td.cell--inline > .mb15 > .form_msg_wrap > .form_textarea-big"
+      text: "+replace_text_4"
+      clearValue: false
+      ignoreError: true
+
+    # 真のとき（交通費あり）
+    +if_2:
+      if>: "${!!koutuuhi}"
+      _do:
+
+        # 選択肢を選ぶ（交通費）
+        +select_option_6:
+          action>: SelectOption
+          browser: "+type_text_12"
+          selector: ":nth-child(1) > .form_msg_wrap > .form_select"
+          value: ''
+          text: 支給あり
+          confirm: true
+          ignoreError: true
+
+    # 真のとき（交通費なし）
+    +if_3:
+      if>: "${!koutuuhi}"
+      _do:
+
+        # 選択肢を選ぶ（交通費なし）
+        +select_option_7:
+          action>: SelectOption
+          browser: "+type_text_12"
+          selector: ":nth-child(1) > .form_msg_wrap > .form_select"
+          value: ''
+          text: 支給なし
+          confirm: true
+          ignoreError: true
+
+    # テキストを作成
+    +text_5:
+      action>: Text
+      text: |-
+        ${pr1}
+        ${pr2}
+        ${pr3}
+
+        ${sigotonaiyou}
+
+    # 検索して置換
+    +replace_text_5:
+      action>: ReplaceText
+      text: "+text_5"
+      find: "<br>"
+      use_regex: true
+      replace_with: ${"\n"}
+
+    # 文字入力（仕事内容）
+    +type_text_13:
+      action>: TypeText
+      browser: "+type_text_12"
+      selector: "#contents_about_job > .md-table > tbody > :nth-child(1) > td > .row
+        > .form_msg_wrap > .form_textarea-big"
+      text: "+replace_text_5"
+      clearValue: false
+      ignoreError: true
+
+    # クリック（さらに詳しく仕事内容を入力する）
+    +click_10:
+      action>: Click
+      browser: "+type_text_13"
+      selector: "#contents_about_job > .table_toggleBtnArea > .table_toggleBtnArea_btn--openBtn"
+      confirm: true
+      ignoreError: true
+
+    # 検索して置換
+    +replace_text_6:
+      action>: ReplaceText
+      text: "${funiki}"
+      find: "<br>"
+      use_regex: true
+      replace_with: ' ${"\n"}'
+
+    # 文字入力（職場の雰囲気）
+    +type_text_14:
+      action>: TypeText
+      browser: "+type_text_13"
+      selector: ":nth-child(7) > .form_msg_wrap > .form_textarea"
+      text: "+replace_text_6"
+      clearValue: false
+      ignoreError: true
+
+    # 検索して置換
+    +replace_text_7:
+      action>: ReplaceText
+      text: "${dayflow}"
+      find: "<br>"
+      use_regex: true
+      replace_with: ' ${"\n"}'
+
+    # 文字入力（1日の流れ）
+    +type_text_15:
+      action>: TypeText
+      browser: "+type_text_14"
+      selector: ":nth-child(5) > td > .row > .form_msg_wrap > .form_textarea"
+      text: "+replace_text_7"
+      clearValue: false
+      ignoreError: true
+
+    # テキストを作成
+    +text_2:
+      action>: Text
+      text: 残り ${saiyousuu} 名で募集終了
+
+    # 文字入力（採用人数）
+    +type_text_16:
+      action>: TypeText
+      browser: "+type_text_15"
+      selector: ":nth-child(2) > td > .mb15 > .form_msg_wrap > .input_general"
+      text: "+text_2"
+      clearValue: false
+      ignoreError: true
+
+    # テキストを作成
+    +text_6:
+      action>: Text
+      text: |-
+        採用が決まり次第募集を終了させていただきます。
+        ※情報反映のタイミングにより既に募集を終了している場合がございます。予めご了承ください。
+
+        ${office}
+        【求人No】#${No}
+
+    # 検索して置換
+    +replace_text_9:
+      action>: ReplaceText
+      text: "+text_6"
+      find: "<br>"
+      use_regex: true
+      replace_with: ' ${"\n"}'
+
+    # 文字入力
+    +type_text_17:
+      action>: TypeText
+      browser: "+type_text_16"
+      selector: ":nth-child(2) > td > :nth-child(2) > .form_msg_wrap > .form_textarea-big"
+      text: "+replace_text_9"
+      clearValue: false
+      ignoreError: true
+
+    # クリック（保存※求人作成完了）
+    +click_8:
+      action>: Click
+      browser: "+type_text_5"
+      selector: "#submit_btn"
+      confirm: true
+      waitAfter: 2000
+      ignoreError: true
+
+    # URLを取得
+    +get_u_r_l_1:
+      action>: GetURL
+      browser: "+click_8"
+
+    # 変数に保存
+    +store_value_3:
+      action>: StoreValue
+      key: URL
+      value: "+get_u_r_l_1"
+
+    # レコードを更新する
+    +salesforce_update_record_1:
+      action>: SalesforceUpdateRecord
+      provider: sfdc_5d1544566cbf9f61b0d2
+      object: JobOffer__c
+      id: "${ID}"
+      data:
+        AirWORK_URL__c: "${URL}"
+      meta:
+        display:
+          provider:
+            type: chip
+            label: Salesforce (y_itasaka@upthemark.com)
+            icon: salesforce
+          object:
+            label: 3. 求人
+            icon: salesforce
+            type: chip
+
+    # クリック（掲載）
+    +click_12:
+      action>: Click
+      browser: "+click_8"
+      selector: "#status_link02 > label > .status_btn"
+      confirm: true
+      ignoreError: true
+
+    # クリック（掲載開始）
+    +click_13:
+      action>: Click
+      browser: "+click_12"
+      selector: "#startPostButton"
+      confirm: true
+      ignoreError: true
+
+    # スクリーンショットを撮る
+    +take_screenshot_1:
+      action>: TakeScreenshot
+      browser: "+click_8"
+      full_page: true
+      type: png
+
+# 真のとき
++if_4:
+  if>: ${status01==="掲載停止"}
+  _do:
+
+    # URLへ遷移
+    +go_to_2:
+      action>: GoTo
+      browser: "+open_browser_1"
+      url: "${AirWORK_URL}"
+
+    # クリック
+    +click_14:
+      action>: Click
+      browser: "+go_to_2"
+      selector: "#status_link01 > label > .status_btn"
+      confirm: true
+      ignoreError: true
+
+    # クリック
+    +click_15:
+      action>: Click
+      browser: "+click_14"
+      selector: "#startFinishButton"
+      confirm: true
+      ignoreError: true
+
+    # スクリーンショットを撮る
+    +take_screenshot_2:
+      action>: TakeScreenshot
+      browser: "+click_15"
+      full_page: false
+      type: png

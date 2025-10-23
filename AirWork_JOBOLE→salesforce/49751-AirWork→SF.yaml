@@ -1,0 +1,417 @@
+# 日時を取得_開始時刻
++get_time_1:
+  action>: GetTime
+  format: YYYY-MM-DD HH:mm:ss.SSS
+  timezone: Asia/Tokyo
+  relativeTime: ''
+
+# 各要素について繰り返す_古い順
++for_each_1:
+  for_each>:
+    mail: "${mails.reverse()}"
+    withIndex: idx
+  _do:
+
+    # スクリプトを実行_確認用
+    +run_script_5:
+      action>: RunScript
+      code: 'return mail;
+
+        '
+
+    # 変数に保存_エラー通知で使用
+    +store_value_8:
+      action>: StoreValue
+      key: url
+      value: "${mail.body.match(/https.*/)[0]}"
+
+    # 変数に保存_SFのクエリやエラー通知で使用
+    +store_value_9:
+      action>: StoreValue
+      key: kyujinRecord
+      value: "${parseInt(0)}"
+
+    # 変数に保存_SFのクエリやエラー通知で使用
+    +store_value_10:
+      action>: StoreValue
+      key: adRecord
+      value: "${parseInt(0)}"
+
+    # 変数に保存
+    +store_value_11:
+      action>: StoreValue
+      key: sfObj
+      value: ''
+
+    # エラーを捕捉する
+    +try_1:
+      try>: isErr
+      _do:
+
+        # スクリプトを実行_IDPWを設定
+        +run_script_1:
+          action>: RunScript
+          code: |
+            //拠点によりIDPW違う
+            const isSaitama = mail.to.includes("saitama");
+            const userId = isSaitama
+              ? "jobs@saitama.upthemark.com"
+              : "jobs@fukui.upthemark.com";
+            const userPW = isSaitama ? "upsaitama123!" : "uppthe123@"; //コロンの左が埼玉、右が福井です。ダブルクォーテーション内部をご変更ください
+
+            return {
+              id: userId,
+              pw: userPW
+            };
+
+        # 変数に保存
+        +store_value_1:
+          action>: StoreValue
+          key: idpw
+          value: "+run_script_1"
+
+        # ブラウザを開く
+        +open_browser_1:
+          action>: OpenBrowser
+          url: https://auth.joboplite.jp/interaction/9471092d-e203-42e9-93b3-21912d28f700
+          lang: ja-JP
+          headless: true
+          windowSize: 1920 x 1080
+          useShadowDomSelector: false
+
+        # 文字入力（ID）
+        +type_text_1:
+          action>: TypeText
+          browser: "+open_browser_1"
+          selector: input[name="email"]
+          text: "${idpw.id}"
+          clearValue: false
+          ignoreError: false
+
+        # パスワード入力
+        +type_password_1:
+          action>: TypePassword
+          browser: "+type_text_1"
+          selector: input[name="password"]
+          password: "********"
+          ignoreError: false
+
+        # クリック（ログイン）
+        +click_1:
+          action>: Click
+          browser: "+type_password_1"
+          selector: button#submit_btn
+          confirm: true
+          waitAfter: 1000
+          ignoreError: false
+          timeout: 30000
+
+        # URLへ遷移
+        +go_to_1:
+          action>: GoTo
+          browser: "+click_1"
+          url: "${mail.body.match(/https.*/)[0]}"
+
+        # ページ内でJavaScriptを実行する_SF日付系情報取得
+        +inject_script_2:
+          action>: InjectScript
+          browser: "+go_to_1"
+          code: |
+            const userJsonDATE = JSON.parse(
+              document.querySelector("#initial-data").getAttribute("data-json")
+            );
+
+            const outputDATE = {
+              time: userJsonDATE.entryData.entryDateTime,
+              birthday: userJsonDATE.entryData.birthday
+                .replace("日生まれ", "")
+                .replace(/年|月|日/g, "-")
+            };
+            outputDATE;
+          waitBefore: 1000
+          returnValue: true
+
+        # 変数に保存
+        +store_value_7:
+          action>: StoreValue
+          key: entryDate
+          value: "+inject_script_2"
+
+        # ページ内でJavaScriptを実行する_メイン情報取得
+        +inject_script_1:
+          action>: InjectScript
+          browser: "+go_to_1"
+          code: |
+            const userJson = JSON.parse(
+              document.querySelector("#initial-data").getAttribute("data-json")
+            );
+
+            //名前に空白が無い場合があるので判定
+            const name = userJson.entryData.name;
+            const kana = userJson.entryData.kana;
+            const hasNotBlankN = !name.match(/\s/);
+            const hasNotBlankK = !kana.match(/\s/);
+
+            //名前に空白がない場合、姓名分離不可。一旦両方にフルネーム突っ込んでSlackに通知
+            const lName = hasNotBlankN ? name : name.split(/\s/)[0];
+            const fName = hasNotBlankN ? name : name.split(/\s/)[1];
+            const kanaL = hasNotBlankK ? kana : kana.split(/\s/)[0];
+            const kanaF = hasNotBlankK ? kana : kana.split(/\s/)[1];
+
+            //応募日時と誕生日(SF日付型)
+            const entryDateTime =
+              "${moment(entryDate.time).format('YYYY-MM-DDTHH:mm:ss.SSS+0900')}";
+            const birthday =
+              "${moment(entryDate.birthday).format('YYYY-MM-DDT00:00:00.000+0900')}";
+            //出力値
+            const output = {};
+            output.nameHasNotBlank = hasNotBlankN; //姓名分離不可フラグ
+            output.kyujinNum = userJson.entryData.storeName.replace(/\D/g, "");
+            output.sf = {
+              Field8__c: entryDateTime, //応募日
+              Field9__c: "WEB", //応募区分。固定。
+              Field17__c: "ジョブオプLite", //応募媒体
+              Field18__c: "", //広告オブジェクトから取得。広告
+              Field19__c: userJson.entryData.storeName.replace(/\D/g, ""), //応募求人No。求人OBJから所属と拠点取ってくるときのSOQLで使用
+              Field10__c: "0017F00002T9bnqQAB", //固定
+              Field1__c: lName,
+              Field2__c: fName,
+              Field3__c: hiraToKana(kanaL),
+              Field4__c: hiraToKana(kanaF),
+              Field5__c: userJson.entryData.phone,
+              Field6__c: userJson.entryData.email,
+              // Field27__c: userJson.entryData.store.cityArea, //AirWorkでは不使用。ジョブオレでは使用。
+              Field54__c: userJson.entryData.gender,
+              birthday__c: birthday,
+              Field20__c: userJson.entryData.age,
+              Field7__c: userJson.entryData.interview, //相談やアピール
+              Field25__c: "", //所属。求人OBJから取得
+              Field45__c: "" //拠点。求人OBJから取得
+            };
+            output;
+
+            function hiraToKana(str) {
+              return str.replace(/[\u3041-\u3096]/g, function(match) {
+                var chr = match.charCodeAt(0) + 0x60;
+                return String.fromCharCode(chr);
+              });
+            }
+          waitBefore: 2000
+          returnValue: true
+
+        # 変数に保存_メイン情報
+        +store_value_2:
+          action>: StoreValue
+          key: sfObj
+          value: "+inject_script_1"
+
+        # ブラウザを閉じる
+        +close_browser_1:
+          action>: CloseBrowser
+          browser: "+open_browser_1"
+
+        # クエリを実行する_求人オブジェクトから応募求人を取得する 1743=拠点, ChargeObBase=所属
+        +salesforce_query_1:
+          action>: SalesforceQuery
+          provider: sfdc_5d1544566cbf9f61b0d2
+          query: |-
+            SELECT Id, job_number__c, Name, Field1743__c, ChargeOfBase__c
+            FROM JobOffer__c
+            WHERE job_number__c = '${String(sfObj.sf.Field19__c)}'
+            ORDER BY job_number__c ASC
+            LIMIT 1
+          meta:
+            display:
+              provider:
+                type: chip
+                label: Salesforce (y_itasaka@upthemark.com)
+                icon: salesforce
+
+        # 変数に保存
+        +store_value_3:
+          action>: StoreValue
+          key: kyujinRecord
+          value: "+salesforce_query_1"
+
+        # 真のとき_求人OBJが存在
+        +if_1:
+          if>: "${kyujinRecord.length}"
+          _do:
+
+            # クエリを実行する_広告オブジェクトから条件を満たす広告を取得。※Airワーク表記はジョブオプLite（JOBUOPU）
+            +salesforce_query_2:
+              action>: SalesforceQuery
+              provider: sfdc_5d1544566cbf9f61b0d2
+              query: |-
+                SELECT Id, Name
+                FROM Advertisement__c
+                WHERE kyoten__c = '${kyujinRecord[0].Field1743__c}' AND Field4__c = 'ジョブオプLite'
+                ORDER BY CreatedDate DESC
+                LIMIT 1
+              meta:
+                display:
+                  provider:
+                    type: chip
+                    label: Salesforce (y_itasaka@upthemark.com)
+                    icon: salesforce
+
+            # 変数に保存
+            +store_value_4:
+              action>: StoreValue
+              key: adRecord
+              value: "+salesforce_query_2"
+
+            # スクリプトを実行_求人OBJを整形
+            +run_script_2:
+              action>: RunScript
+              code: |
+                sfObj.sf.Field19__c = kyujinRecord[0].Id; //応募求人
+                sfObj.sf.Field45__c = kyujinRecord[0].Field1743__c; //拠点
+                sfObj.sf.Field25__c = kyujinRecord[0].ChargeOfBase__c; //所属
+                if (adRecord.length) {
+                  sfObj.sf.Field18__c = adRecord[0].Id;
+                } else {
+                  delete sfObj.sf.Field18__c;
+                }
+                return sfObj;
+
+            # 変数に保存
+            +store_value_5:
+              action>: StoreValue
+              key: sfObj
+              value: "+run_script_2"
+
+        # レコードを作成する_応募に新レコードを作成
+        +salesforce_create_record_1:
+          action>: SalesforceCreateRecord
+          provider: sfdc_5d1544566cbf9f61b0d2
+          object: Entry__c
+          data: "${sfObj.sf}"
+          meta:
+            display:
+              provider:
+                type: chip
+                label: Salesforce (y_itasaka@upthemark.com)
+                icon: salesforce
+
+        # データを保存する_LastIDを更新
+        +data_store_save_1:
+          action>: DataStoreSave
+          key: lastId_AIRWORK
+          value: "${mail.id}"
+
+        # 真のとき_Airワーク_姓名分離不可
+        +if_2:
+          if>: "${sfObj.nameHasNotBlank}"
+          _do:
+
+            # オブジェクトのキーの値を取得
+            +get_value_with_key_1:
+              action>: GetValueWithKey
+              object: "+salesforce_create_record_1"
+              key: id
+
+            # 変数に保存
+            +store_value_6:
+              action>: StoreValue
+              key: entryId
+              value: "+get_value_with_key_1"
+
+            # テキストを作成
+            +text_1:
+              action>: Text
+              text: |-
+                ※Airワーク姓名分離※
+                以下のレコードで、姓と名が分離できませんでした。ご確認をお願い致します。
+                https://upthemark.lightning.force.com/lightning/r/Entry__c/${entryId}/view
+
+            # Slackでメッセージを送信
+            +send_slack_message_1:
+              action>: SendSlackMessage
+              provider: slack_1d02f58ac5dff80799f9
+              channel: "#システムerror通知"
+              text: "+text_1"
+              send_select: false
+              response_message: false
+              meta:
+                display:
+                  provider:
+                    type: chip
+                    label: Slack (Up the Mark Group)
+                    icon: slack
+
+    # エラーのとき
+    +if_3:
+      if>: "${isErr}"
+      _do:
+
+        # スクリプトを実行_確認用
+        +run_script_4:
+          action>: RunScript
+          code: 'return mail;
+
+            '
+
+        # スクリプトを実行_エラー内容を生成
+        +run_script_3:
+          action>: RunScript
+          code: |
+            const errorOutput = {
+              求人: "",
+              広告: ""
+            };
+            if (!adRecord.length && kyujinRecord.length) {
+              errorOutput.広告 =
+                "広告オブジェクトに以下条件を満たすレコードが存在しませんでした。\n拠点 = " +
+                kyujinRecord[0].Field1743__c +
+                "\n広告媒体 = 「ジョブオプLite」（Airワーク）";
+            } else if (!kyujinRecord.length && !!sfObj.sf) {
+              errorOutput.求人 =
+                "求人オブジェクトに求人No「" +
+                sfObj.sf.Field19__c +
+                "」が存在しませんでした。";
+            } else if (!kyujinRecord.length) {
+              errorOutput.求人 = "求人Noが取得できませんでした";
+            }
+            return errorOutput;
+
+        # 変数に保存
+        +store_value_12:
+          action>: StoreValue
+          key: er
+          value: "+run_script_3"
+
+        # エラーテキストを作成
+        +text_2:
+          action>: Text
+          text: |-
+            AirWork→SFへの転記でエラーが発生しました。
+            エラーメッセージ：${isErr.message}
+            該当応募者URL
+            ${url}
+
+            備考（あれば↓に文字が入ります）
+            ${er.広告}
+            ${er.求人}
+
+        # Slackでメッセージを送信
+        +send_slack_message_2:
+          action>: SendSlackMessage
+          provider: slack_1d02f58ac5dff80799f9
+          channel: "#システムerror通知"
+          text: "+text_2"
+          send_select: false
+          response_message: false
+          meta:
+            display:
+              provider:
+                type: chip
+                label: Slack (Up the Mark Group)
+                icon: slack
+
+# 日時を取得_終了時刻
++get_time_2:
+  action>: GetTime
+  format: YYYY-MM-DD HH:mm:ss.SSS
+  timezone: Asia/Tokyo
+  relativeTime: ''
