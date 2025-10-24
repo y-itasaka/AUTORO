@@ -501,7 +501,7 @@
           action>: Text
           display_name>: Slack文_姓名分離不可
           text: |-
-            ※ブルカラ姓名分離※
+            ※ラコット姓名分離※
             以下のレコードで、姓と名が分離できませんでした。ご確認をお願い致します。
             https://upthemark.lightning.force.com/lightning/r/Entry__c/${entryId}/view
           private: false
@@ -573,7 +573,7 @@
       action>: Text
       display_name>: Slack文_エラー
       text: |-
-        ブルカラ→SFへの転記でエラーが発生しました。
+        ラコット→SFへの転記でエラーが発生しました。
         エラーメッセージ：${isErr.message}
         該当応募者URL
         ${OuboListURL}
